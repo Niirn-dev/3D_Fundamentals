@@ -23,6 +23,8 @@
 #include "Mat2.h"
 #include "Mat3.h"
 #include "PubeScreenTransformer.h"
+#include "Cube.h"
+#include "IndexedLineList.h"
 
 Game::Game( MainWindow& wnd )
 	:
@@ -45,21 +47,17 @@ void Game::UpdateModel()
 
 void Game::ComposeFrame()
 {
-	std::vector<Vec3> verts;
-	verts.reserve( 4 );
-	verts.emplace_back( -0.5f,-0.5f,0.0f );
-	verts.emplace_back( 0.5f,-0.5f,0.0f );
-	verts.emplace_back( 0.5f,0.5f,0.0f );
-	verts.emplace_back( -0.5f,0.5f,0.0f );
+	Cube c( 1.0f,Vec3{ 0.0f,0.0f,1.0f } );
+	auto ill = c.GetLineList();
 
 	PubeScreenTransformer pbs;
-	for ( auto& v : verts )
+	for ( auto& v : ill.vertices )
 	{
 		pbs.Transform( v );
 	}
 
-	gfx.DrawLine( verts[0],verts[1],Colors::White );
-	gfx.DrawLine( verts[1],verts[2],Colors::White );
-	gfx.DrawLine( verts[2],verts[3],Colors::White );
-	gfx.DrawLine( verts[3],verts[0],Colors::White );
+	for ( auto i = ill.indices.begin(); i != ill.indices.end(); std::advance( i,2 ) )
+	{
+		gfx.DrawLine( ill.vertices[*i],ill.vertices[*std::next( i )],Colors::White );
+	}
 }
