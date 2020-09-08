@@ -22,6 +22,7 @@
 #include "Game.h"
 #include "Mat2.h"
 #include "Mat3.h"
+#include "PubeScreenTransformer.h"
 
 Game::Game( MainWindow& wnd )
 	:
@@ -44,12 +45,21 @@ void Game::UpdateModel()
 
 void Game::ComposeFrame()
 {
-	Vec3 v = { 1.0f,2.0f,3.0f };
-	Mat3 m = { 
-		10.0f,9.0f,1.0f,
-		7.0f,12.0f,13.0f,
-		1.0f,0.0f,12.0f
-	};
+	std::vector<Vec3> verts;
+	verts.reserve( 4 );
+	verts.emplace_back( -0.5f,-0.5f,0.0f );
+	verts.emplace_back( 0.5f,-0.5f,0.0f );
+	verts.emplace_back( 0.5f,0.5f,0.0f );
+	verts.emplace_back( -0.5f,0.5f,0.0f );
 
-	v *= m;
+	PubeScreenTransformer pbs;
+	for ( auto& v : verts )
+	{
+		pbs.Transform( v );
+	}
+
+	gfx.DrawLine( verts[0],verts[1],Colors::White );
+	gfx.DrawLine( verts[1],verts[2],Colors::White );
+	gfx.DrawLine( verts[2],verts[3],Colors::White );
+	gfx.DrawLine( verts[3],verts[0],Colors::White );
 }
