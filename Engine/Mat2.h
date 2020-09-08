@@ -71,8 +71,8 @@ public:
 	}
 	static _Mat2 Rotation( T theta )
 	{
-		const T cosTheta = cos( theta );
-		const T sinTheta = sin( theta );
+		const T cosTheta = (T)cos( theta );
+		const T sinTheta = (T)sin( theta );
 		_Mat2 r = { 
 			cosTheta,	sinTheta,
 			-sinTheta,	cosTheta };

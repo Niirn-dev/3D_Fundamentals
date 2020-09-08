@@ -32,8 +32,8 @@ Game::Game( MainWindow& wnd )
 	{
 		const float rad = (i % 2 == 0) ? radOuter : radInner;
 		star.emplace_back(
-			rad * cos( float( i ) * dTheta ),
-			rad * sin( float( i ) * dTheta )
+			rad * (float)cos( double( i ) * dTheta ),
+			rad * (float)sin( double( i ) * dTheta )
 		);
 	}
 }
