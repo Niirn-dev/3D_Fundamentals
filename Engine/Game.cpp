@@ -46,29 +46,29 @@ void Game::UpdateModel()
 
 	if ( wnd.kbd.KeyIsPressed( 'Q' ) )
 	{
-		angleX += dTheta * dt;
+		angleX = wrap_angle( angleX + dTheta * dt );
 	}
 	if ( wnd.kbd.KeyIsPressed( 'A' ) )
 	{
-		angleX -= dTheta * dt;
+		angleX = wrap_angle( angleX - dTheta * dt );
 	}
 
 	if ( wnd.kbd.KeyIsPressed( 'W' ) )
 	{
-		angleY += dTheta * dt;
+		angleY = wrap_angle( angleY + dTheta * dt );
 	}
 	if ( wnd.kbd.KeyIsPressed( 'S' ) )
 	{
-		angleY -= dTheta * dt;
+		angleY = wrap_angle( angleY - dTheta * dt );
 	}
 
 	if ( wnd.kbd.KeyIsPressed( 'E' ) )
 	{
-		angleZ += dTheta * dt;
+		angleZ = wrap_angle( angleZ + dTheta * dt );
 	}
 	if ( wnd.kbd.KeyIsPressed( 'D' ) )
 	{
-		angleZ -= dTheta * dt;
+		angleZ = wrap_angle( angleZ - dTheta * dt );
 	}
 }
 
@@ -86,7 +86,6 @@ void Game::ComposeFrame()
 		v.z += 1.0f;
 
 		pbs.Transform( v );
-
 	}
 
 	for ( auto i = ill.indices.begin(); i != ill.indices.end(); std::advance( i,2 ) )

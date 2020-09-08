@@ -21,11 +21,24 @@
 #pragma once
 
 #include <math.h>
+#include <type_traits>
 
-constexpr float PI = 3.14159265f;
+constexpr double PI_D = 3.1415926535897932;
+constexpr float PI = (float)PI_D;
 
 template <typename T>
 inline auto sq( const T& x )
 {
+	static_assert( std::is_arithmetic_v<T>,"Template parameter is not of an arithmetic type" );
 	return x * x;
+}
+
+template <typename T>
+inline auto wrap_angle( T angle )
+{
+	static_assert( std::is_arithmetic_v<T>,"Template parameter is not of an arithmetic type" );
+	const T modded = (T)fmod( (double)angle,2.0 * PI_D );
+	return modded > (T)PI_D ?
+		modded - T( 2.0 * PI_D ) :
+		modded;
 }
