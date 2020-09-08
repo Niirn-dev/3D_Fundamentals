@@ -83,7 +83,7 @@ void Game::ComposeFrame()
 	for ( auto& v : ill.vertices )
 	{
 		v *= rot;
-		v.z += 1.0f;
+		v.z += 2.0f;
 
 		pbs.Transform( v );
 	}

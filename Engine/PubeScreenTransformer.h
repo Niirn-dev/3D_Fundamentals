@@ -15,8 +15,8 @@ public:
 
 	Vec3& Transform( Vec3& v )
 	{
-		v.x = ( v.x + 1.0f ) * xFactor;
-		v.y = ( -v.y + 1.0f ) * yFactor;
+		v.x = ( ( v.x / v.z ) + 1.0f ) * xFactor;
+		v.y = ( -( v.y / v.z ) + 1.0f ) * yFactor;
 		return v;
 	}
 	Vec3 GetTransformed( const Vec3& v )
