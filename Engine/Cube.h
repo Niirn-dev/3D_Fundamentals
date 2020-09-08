@@ -7,9 +7,7 @@
 class Cube
 {
 public:
-	Cube( float size,Vec3 pos = { 0.0f,0.0f,0.0f } )
-		:
-		pos( pos )
+	Cube( float size )
 	{
 		const float side = size / 2.0f;
 
@@ -37,5 +35,4 @@ public:
 
 private:
 	std::vector<Vec3> verts;
-	Vec3 pos;
 };

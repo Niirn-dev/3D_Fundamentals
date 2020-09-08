@@ -22,14 +22,13 @@
 #include "Game.h"
 #include "Mat2.h"
 #include "Mat3.h"
-#include "PubeScreenTransformer.h"
-#include "Cube.h"
 #include "IndexedLineList.h"
 
 Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
-	gfx( wnd )
+	gfx( wnd ),
+	c( 1.0f )
 {
 }
 
@@ -43,17 +42,51 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
+	const float dt = 1.0f / 60.0f;
+
+	if ( wnd.kbd.KeyIsPressed( 'Q' ) )
+	{
+		angleX += dTheta * dt;
+	}
+	if ( wnd.kbd.KeyIsPressed( 'A' ) )
+	{
+		angleX -= dTheta * dt;
+	}
+
+	if ( wnd.kbd.KeyIsPressed( 'W' ) )
+	{
+		angleY += dTheta * dt;
+	}
+	if ( wnd.kbd.KeyIsPressed( 'S' ) )
+	{
+		angleY -= dTheta * dt;
+	}
+
+	if ( wnd.kbd.KeyIsPressed( 'E' ) )
+	{
+		angleZ += dTheta * dt;
+	}
+	if ( wnd.kbd.KeyIsPressed( 'D' ) )
+	{
+		angleZ -= dTheta * dt;
+	}
 }
 
 void Game::ComposeFrame()
 {
-	Cube c( 1.0f,Vec3{ 0.0f,0.0f,1.0f } );
 	auto ill = c.GetLineList();
 
-	PubeScreenTransformer pbs;
+	auto rot =
+		Mat3::RotationX( angleX ) *
+		Mat3::RotationY( angleY ) *
+		Mat3::RotationZ( angleZ );
 	for ( auto& v : ill.vertices )
 	{
+		v *= rot;
+		v.z += 1.0f;
+
 		pbs.Transform( v );
+
 	}
 
 	for ( auto i = ill.indices.begin(); i != ill.indices.end(); std::advance( i,2 ) )

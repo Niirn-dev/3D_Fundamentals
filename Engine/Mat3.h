@@ -63,6 +63,36 @@ public:
 		};
 		return s;
 	}
+	static _Mat3 RotationX( T angle )
+	{
+		const T sint = (T)sin( angle );
+		const T cost = (T)cos( angle );
+		return {
+			(T)1.0,	(T)0.0,	(T)0.0,
+			(T)0.0,	cost,	sint,
+			(T)0.0,	-sint,	cost
+		};
+	}
+	static _Mat3 RotationY( T angle )
+	{
+		const T sint = (T)sin( angle );
+		const T cost = (T)cos( angle );
+		return {
+			cost,	(T)0.0,	-sint,
+			(T)0.0,	(T)1.0,	(T)0.0,
+			sint,	(T)0.0,	cost
+		};
+	}
+	static _Mat3 RotationZ( T angle )
+	{
+		const T sint = (T)sin( angle );
+		const T cost = (T)cos( angle );
+		return {
+			cost,	sint,	(T)0.0,
+			-sint,	cost,	(T)0.0,
+			(T)0.0,	(T)0.0,	(T)1.0
+		};
+	}
 public:
 	// [ row ][ col ]
 	T elements[3][3];
