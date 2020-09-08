@@ -21,21 +21,13 @@
 #include "MainWindow.h"
 #include "Game.h"
 #include "Mat2.h"
+#include "Mat3.h"
 
 Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
 	gfx( wnd )
 {
-	const float dTheta = 2.0f * PI / float( nflares * 2 );
-	for( int i = 0; i < nflares * 2; i++ )
-	{
-		const float rad = (i % 2 == 0) ? radOuter : radInner;
-		star.emplace_back(
-			rad * (float)cos( double( i ) * dTheta ),
-			rad * (float)sin( double( i ) * dTheta )
-		);
-	}
 }
 
 void Game::Go()
@@ -48,25 +40,16 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
-	if( !wnd.kbd.KeyIsPressed( VK_SPACE ) )
-	{
-		theta += vRot;
-	}
 }
 
 void Game::ComposeFrame()
 {
-	const Vec2 trl = { float( gfx.ScreenWidth ) / 2.0f,float( gfx.ScreenHeight ) / 2.0f };
-	const Mat2 trf = Mat2::Rotation( theta ) * Mat2::Scaling( size );
-	auto vtx( star );
-	for( auto& v : vtx )
-	{
-		v *= trf;
-		v += trl;
-	}
-	for( auto i = vtx.cbegin(),end = std::prev( vtx.cend() ); i != end; i++ )
-	{
-		gfx.DrawLine( *i,*std::next( i ),Colors::White );
-	}
-	gfx.DrawLine( vtx.front(),vtx.back(),Colors::White );
+	Vec3 v = { 1.0f,2.0f,3.0f };
+	Mat3 m = { 
+		10.0f,9.0f,1.0f,
+		7.0f,12.0f,13.0f,
+		1.0f,0.0f,12.0f
+	};
+
+	v *= m;
 }
