@@ -70,26 +70,49 @@ void Game::UpdateModel()
 	{
 		angleZ = wrap_angle( angleZ - dTheta * dt );
 	}
+
+	if ( wnd.kbd.KeyIsPressed( 'R' ) )
+	{
+		offsetZ = offsetZ + 2.0f * dt;
+	}
+	if ( wnd.kbd.KeyIsPressed( 'F' ) )
+	{
+		offsetZ = std::max( 2.0f,offsetZ - 2.0f * dt );;
+	}
 }
 
 void Game::ComposeFrame()
 {
-	auto ill = c.GetLineList();
+	auto list = c.GetTriangleList();
 
 	auto rot =
 		Mat3::RotationX( angleX ) *
 		Mat3::RotationY( angleY ) *
 		Mat3::RotationZ( angleZ );
-	for ( auto& v : ill.vertices )
+	for ( auto& v : list.vertices )
 	{
 		v *= rot;
-		v.z += 2.0f;
+		v.z += offsetZ;
 
 		pbs.Transform( v );
 	}
 
-	for ( auto i = ill.indices.begin(); i != ill.indices.end(); std::advance( i,2 ) )
+	const Color c[] = {
+		Colors::White,
+		Colors::Red,
+		Colors::Cyan,
+		Colors::Gray,
+		Colors::Green,
+		Colors::Blue,
+		Colors::Yellow
+	};
+
+	for ( auto i = list.indices.begin(), end = list.indices.end(); i != end; std::advance( i,3 ) )
 	{
-		gfx.DrawLine( ill.vertices[*i],ill.vertices[*std::next( i )],Colors::White );
+		gfx.DrawTriangle( 
+			list.vertices[*i],
+			list.vertices[*std::next( i )],
+			list.vertices[*std::next( i,2 )],
+			c[std::distance( list.indices.begin(),i ) / 3 % std::size( c )] );
 	}
 }

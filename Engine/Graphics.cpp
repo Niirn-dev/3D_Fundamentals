@@ -381,3 +381,95 @@ void Graphics::DrawLine( float x1,float y1,float x2,float y2,Color c )
 		}
 	}
 }
+
+void Graphics::DrawTriangle( const Vec2& v0,const Vec2& v1,const Vec2& v2,Color c )
+{
+	// Get pointers to verts for easier swapping
+	const Vec2* pv0 = &v0;
+	const Vec2* pv1 = &v1;
+	const Vec2* pv2 = &v2;
+
+	// Sort verts by y
+	if ( pv0->y > pv1->y ) std::swap( pv0,pv1 );
+	if ( pv0->y > pv2->y ) std::swap( pv0,pv2 );
+	if ( pv1->y > pv2->y ) std::swap( pv1,pv2 );
+
+	// Establish the type of the passed in triangle
+	if ( pv0->y == pv1->y ) // Flat top triangle
+	{
+		// Sort verts by x
+		if ( pv0->x > pv1->x ) std::swap( pv0,pv1 );
+		DrawTriangleFlatTop( *pv0,*pv1,*pv2,c );
+	}
+	else if ( pv1->y == pv2->y ) // Flat bottom triangle
+	{
+		// Sort verts by x
+		if ( pv1->x > pv2->x ) std::swap( pv1,pv2 );
+		DrawTriangleFlatBottom( *pv0,*pv1,*pv2,c );
+	}
+	else // General triangle
+	{
+		// Find splitting vertex
+		const float splitAlpha =
+			( pv1->y - pv0->y ) /
+			( pv2->y - pv0->y );
+		const Vec2 split = *pv0 + ( *pv2 - *pv0 ) * splitAlpha;
+
+		if ( split.x > pv1->x ) // Major right triangle
+		{
+			DrawTriangleFlatBottom( *pv0,*pv1,split,c );
+			DrawTriangleFlatTop( *pv1,split,*pv2,c );
+		}
+		else // Major left triangle
+		{
+			DrawTriangleFlatBottom( *pv0,split,*pv1,c );
+			DrawTriangleFlatTop( split,*pv1,*pv2,c );
+		}
+	}
+}
+
+void Graphics::DrawTriangleFlatTop( const Vec2& v0,const Vec2& v1,const Vec2& v2,Color c )
+{
+	// Get slopes for side lines
+	const float m0 = ( v2.x - v0.x ) / ( v2.y - v0.y );
+	const float m1 = ( v2.x - v1.x ) / ( v2.y - v1.y );
+
+	// Get start and end for y according to top rule
+	const int yStart = (int)std::ceil( v0.y - 0.5f );
+	const int yEnd = (int)std::ceil( v2.y - 0.5f );
+
+	for ( int y = yStart; y < yEnd; ++y )
+	{
+		// Get start and end for x according to left rule
+		const int xStart = (int)std::ceil( ( y - yStart ) * m0 + v0.x - 0.5f);
+		const int xEnd = (int)std::ceil( ( y - yStart ) * m1 + v1.x - 0.5f);
+
+		for ( int x = xStart; x < xEnd; ++x )
+		{
+			PutPixel( x,y,c );
+		}
+	}
+}
+
+void Graphics::DrawTriangleFlatBottom( const Vec2& v0,const Vec2& v1,const Vec2& v2,Color c )
+{
+	// Get slopes for side lines
+	const float m0 = ( v1.x - v0.x ) / ( v1.y - v0.y );
+	const float m1 = ( v2.x - v0.x ) / ( v2.y - v0.y );
+
+	// Get start and end for y according to top rule
+	const int yStart = (int)std::ceil( v0.y - 0.5f );
+	const int yEnd = (int)std::ceil( v2.y - 0.5f );
+
+	for ( int y = yStart; y < yEnd; ++y )
+	{
+		// Get start and end for x according to left rule
+		const int xStart = (int)std::ceil( ( y - yStart ) * m0 + v0.x - 0.5f );
+		const int xEnd = (int)std::ceil( ( y - yStart ) * m1 + v0.x - 0.5f );
+
+		for ( int x = xStart; x < xEnd; ++x )
+		{
+			PutPixel( x,y,c );
+		}
+	}
+}

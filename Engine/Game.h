@@ -51,5 +51,6 @@ private:
 	float angleX = 0.0f;
 	float angleY = 0.0f;
 	float angleZ = 0.0f;
+	float offsetZ = 3.0f;
 	/********************************/
 };
