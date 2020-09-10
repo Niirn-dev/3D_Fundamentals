@@ -20,16 +20,15 @@
 ******************************************************************************************/
 #include "MainWindow.h"
 #include "Game.h"
-#include "Mat2.h"
-#include "Mat3.h"
-#include "IndexedLineList.h"
+#include "SolidCubeScene.h"
 
 Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
-	gfx( wnd ),
-	c( 1.0f )
+	gfx( wnd )
 {
+	scenes.push_back( std::make_unique<SolidCubeScene>( pst,1.0f ) );
+	curScene = scenes.begin();
 }
 
 void Game::Go()
@@ -44,93 +43,28 @@ void Game::UpdateModel()
 {
 	const float dt = 1.0f / 60.0f;
 
-	if ( wnd.kbd.KeyIsPressed( 'Q' ) )
-	{
-		angleX = wrap_angle( angleX + dTheta * dt );
-	}
-	if ( wnd.kbd.KeyIsPressed( 'A' ) )
-	{
-		angleX = wrap_angle( angleX - dTheta * dt );
-	}
+	( *curScene )->Update( wnd.kbd,wnd.mouse,dt );
 
-	if ( wnd.kbd.KeyIsPressed( 'W' ) )
+	if ( !wnd.kbd.KeyIsEmpty() )
 	{
-		angleY = wrap_angle( angleY + dTheta * dt );
+		auto e = wnd.kbd.ReadKey();
+		if ( e.IsPress() && e.GetCode() == VK_TAB )
+		{
+			CycleScenes();
+		}
 	}
-	if ( wnd.kbd.KeyIsPressed( 'S' ) )
-	{
-		angleY = wrap_angle( angleY - dTheta * dt );
-	}
+}
 
-	if ( wnd.kbd.KeyIsPressed( 'E' ) )
+void Game::CycleScenes()
+{
+	++curScene;
+	if ( curScene == scenes.end() )
 	{
-		angleZ = wrap_angle( angleZ + dTheta * dt );
-	}
-	if ( wnd.kbd.KeyIsPressed( 'D' ) )
-	{
-		angleZ = wrap_angle( angleZ - dTheta * dt );
-	}
-
-	if ( wnd.kbd.KeyIsPressed( 'R' ) )
-	{
-		offsetZ = offsetZ + 2.0f * dt;
-	}
-	if ( wnd.kbd.KeyIsPressed( 'F' ) )
-	{
-		offsetZ = std::max( 2.0f,offsetZ - 2.0f * dt );;
+		curScene = scenes.begin();
 	}
 }
 
 void Game::ComposeFrame()
 {
-	auto list = c.GetTriangleList();
-
-	auto rot =
-		Mat3::RotationX( angleX ) *
-		Mat3::RotationY( angleY ) *
-		Mat3::RotationZ( angleZ );
-	for ( auto& v : list.vertices )
-	{
-		v *= rot;
-		v.z += offsetZ;
-	}
-
-	for ( size_t i = 0; i < list.indices.size() / 3; ++i )
-	{
-		const Vec3& v0 = list.vertices[list.indices[3 * i]];
-		const Vec3& v1 = list.vertices[list.indices[3 * i + 1]];
-		const Vec3& v2 = list.vertices[list.indices[3 * i + 2]];
-
-		if ( (v1 - v0) % (v2 - v0) * v0 >= 0.0f )
-		{
-			list.cullingMask[i] = false;
-		}
-	}
-
-	for ( auto& v : list.vertices )
-	{
-		pbs.Transform( v );
-	}
-
-	const Color c[] = {
-		Colors::White,
-		Colors::Red,
-		Colors::Cyan,
-		Colors::Gray,
-		Colors::Green,
-		Colors::Blue,
-		Colors::Yellow
-	};
-
-	for ( size_t i = 0; i < list.indices.size() / 3; ++i )
-	{
-		if ( list.cullingMask[i] )
-		{
-			gfx.DrawTriangle(
-				list.vertices[list.indices[3 * i]],
-				list.vertices[list.indices[3 * i + 1]],
-				list.vertices[list.indices[3 * i + 2]],
-				c[i % std::size( c )] );
-		}
-	}
+	( *curScene )->Draw( gfx );
 }

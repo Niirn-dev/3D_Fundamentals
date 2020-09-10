@@ -26,6 +26,8 @@
 #include "ChiliMath.h"
 #include "PubeScreenTransformer.h"
 #include "Cube.h"
+#include <memory>
+#include "Scene.h"
 
 class Game
 {
@@ -39,18 +41,15 @@ private:
 	void UpdateModel();
 	/********************************/
 	/*  User Functions              */
+	void CycleScenes();
 	/********************************/
 private:
 	MainWindow& wnd;
 	Graphics gfx;
 	/********************************/
 	/*  User Variables              */
-	PubeScreenTransformer pbs;
-	Cube c;
-	static constexpr float dTheta = PI / 4.0f;
-	float angleX = 0.0f;
-	float angleY = 0.0f;
-	float angleZ = 0.0f;
-	float offsetZ = 3.0f;
+	PubeScreenTransformer pst;
+	std::vector<std::unique_ptr<Scene>> scenes;
+	std::vector<std::unique_ptr<Scene>>::iterator curScene;
 	/********************************/
 };
