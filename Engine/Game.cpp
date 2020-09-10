@@ -93,7 +93,22 @@ void Game::ComposeFrame()
 	{
 		v *= rot;
 		v.z += offsetZ;
+	}
 
+	for ( size_t i = 0; i < list.indices.size() / 3; ++i )
+	{
+		const Vec3& v0 = list.vertices[list.indices[3 * i]];
+		const Vec3& v1 = list.vertices[list.indices[3 * i + 1]];
+		const Vec3& v2 = list.vertices[list.indices[3 * i + 2]];
+
+		if ( (v1 - v0) % (v2 - v0) * v0 >= 0.0f )
+		{
+			list.cullingMask[i] = false;
+		}
+	}
+
+	for ( auto& v : list.vertices )
+	{
 		pbs.Transform( v );
 	}
 
@@ -107,12 +122,15 @@ void Game::ComposeFrame()
 		Colors::Yellow
 	};
 
-	for ( auto i = list.indices.begin(), end = list.indices.end(); i != end; std::advance( i,3 ) )
+	for ( size_t i = 0; i < list.indices.size() / 3; ++i )
 	{
-		gfx.DrawTriangle( 
-			list.vertices[*i],
-			list.vertices[*std::next( i )],
-			list.vertices[*std::next( i,2 )],
-			c[std::distance( list.indices.begin(),i ) / 3 % std::size( c )] );
+		if ( list.cullingMask[i] )
+		{
+			gfx.DrawTriangle(
+				list.vertices[list.indices[3 * i]],
+				list.vertices[list.indices[3 * i + 1]],
+				list.vertices[list.indices[3 * i + 2]],
+				c[i % std::size( c )] );
+		}
 	}
 }

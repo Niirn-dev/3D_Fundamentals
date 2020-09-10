@@ -91,6 +91,14 @@ public:
 	{
 		return _Vec3( *this ) *= rhs;
 	}
+	_Vec3	operator%( const _Vec3& rhs ) const
+	{
+		return {
+			y * rhs.z - z * rhs.y,
+			z * rhs.x - x * rhs.z,
+			x * rhs.y - y * rhs.x
+		};
+	}
 	_Vec3&	operator/=( const T& rhs )
 	{
 		x /= rhs;
