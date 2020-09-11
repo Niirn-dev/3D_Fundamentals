@@ -38,6 +38,27 @@ public:
 	{
 		return TexVertex( *this ) -= rhs;
 	}
+	TexVertex&	operator*=( const float& rhs )
+	{
+		pos *= rhs;
+		tc *= rhs;
+		return *this;
+	}
+	TexVertex	operator*( const float& rhs ) const
+	{
+		return TexVertex( *this ) *= rhs;
+	}
+	TexVertex&	operator/=( const float& rhs )
+	{
+		pos /= rhs;
+		tc /= rhs;
+		return *this;
+	}
+	TexVertex	operator/( const float& rhs ) const
+	{
+		return TexVertex( *this ) /= rhs;
+	}
+
 	TexVertex	InterpolateTo( const TexVertex& rhs,float alpha ) const
 	{
 		return {
