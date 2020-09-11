@@ -8,6 +8,8 @@
 #include "PubeScreenTransformer.h"
 #include "Surface.h"
 #include "TexVertex.h"
+#include "TexFittingFunctors.h"
+#include <memory>
 
 class TexCubeScene : public Scene
 {
@@ -16,6 +18,7 @@ public:
 		:
 		pst( pst ),
 		c( cubeSize ),
+		texFitting( std::make_unique<TexClamp>() ),
 		tex( tex )
 	{
 	}
@@ -97,13 +100,15 @@ public:
 					list.vertices[list.indices[3 * i]],
 					list.vertices[list.indices[3 * i + 1]],
 					list.vertices[list.indices[3 * i + 2]],
-					tex );
+					tex,
+					*texFitting );
 			}
 		}
 	}
 private:
 	PubeScreenTransformer& pst;
 	Cube c;
+	std::unique_ptr<TexFittingFunctor> texFitting;
 	const Surface& tex;
 	static constexpr float dTheta = PI / 4.0f;
 	float angleX = 0.0f;

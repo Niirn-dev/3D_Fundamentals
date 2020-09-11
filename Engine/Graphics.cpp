@@ -428,7 +428,7 @@ void Graphics::DrawTriangle( const Vec2& v0,const Vec2& v1,const Vec2& v2,Color 
 	}
 }
 
-void Graphics::DrawTriangleTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex )
+void Graphics::DrawTriangleTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex,const TexFittingFunctor& func )
 {
 	// Get pointers to verts for easier swapping
 	const auto* pv0 = &v0;
@@ -445,13 +445,13 @@ void Graphics::DrawTriangleTex( const TexVertex& v0,const TexVertex& v1,const Te
 	{
 		// Sort verts by x
 		if ( pv0->pos.x > pv1->pos.x ) std::swap( pv0,pv1 );
-		DrawTriangleFlatTopTex( *pv0,*pv1,*pv2,tex );
+		DrawTriangleFlatTopTex( *pv0,*pv1,*pv2,tex,func );
 	}
 	else if ( pv1->pos.y == pv2->pos.y ) // Flat bottom triangle
 	{
 		// Sort verts by x
 		if ( pv1->pos.x > pv2->pos.x ) std::swap( pv1,pv2 );
-		DrawTriangleFlatBottomTex( *pv0,*pv1,*pv2,tex );
+		DrawTriangleFlatBottomTex( *pv0,*pv1,*pv2,tex,func );
 	}
 	else // General triangle
 	{
@@ -463,13 +463,13 @@ void Graphics::DrawTriangleTex( const TexVertex& v0,const TexVertex& v1,const Te
 
 		if ( split.pos.x > pv1->pos.x ) // Major right triangle
 		{
-			DrawTriangleFlatBottomTex( *pv0,*pv1,split,tex );
-			DrawTriangleFlatTopTex( *pv1,split,*pv2,tex );
+			DrawTriangleFlatBottomTex( *pv0,*pv1,split,tex,func );
+			DrawTriangleFlatTopTex( *pv1,split,*pv2,tex,func );
 		}
 		else // Major left triangle
 		{
-			DrawTriangleFlatBottomTex( *pv0,split,*pv1,tex );
-			DrawTriangleFlatTopTex( split,*pv1,*pv2,tex );
+			DrawTriangleFlatBottomTex( *pv0,split,*pv1,tex,func );
+			DrawTriangleFlatTopTex( split,*pv1,*pv2,tex,func );
 		}
 	}
 }
@@ -528,7 +528,7 @@ void Graphics::DrawTriangleFlatBottom( const Vec2& v0,const Vec2& v1,const Vec2&
 	}
 }
 
-void Graphics::DrawTriangleFlatTopTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex )
+void Graphics::DrawTriangleFlatTopTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex,const TexFittingFunctor& func )
 {
 	// Get dVertex / dy
 	const float dy = v2.pos.y - v0.pos.y;
@@ -538,10 +538,10 @@ void Graphics::DrawTriangleFlatTopTex( const TexVertex& v0,const TexVertex& v1,c
 	// Get interpolated edges
 	TexVertex itEdge1 = v1;
 
-	DrawTriangleFlatTex( v0,v1,v2,tex,dv0,dv1,itEdge1 );
+	DrawTriangleFlatTex( v0,v1,v2,tex,func,dv0,dv1,itEdge1 );
 }
 
-void Graphics::DrawTriangleFlatBottomTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex )
+void Graphics::DrawTriangleFlatBottomTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex,const TexFittingFunctor& func )
 {
 	// Get dVertex / dy
 	const float dy = v2.pos.y - v0.pos.y;
@@ -551,10 +551,10 @@ void Graphics::DrawTriangleFlatBottomTex( const TexVertex& v0,const TexVertex& v
 	// Get the interpolated edges
 	TexVertex itEdge1 = v0;
 
-	DrawTriangleFlatTex( v0,v1,v2,tex,dv0,dv1,itEdge1 );
+	DrawTriangleFlatTex( v0,v1,v2,tex,func,dv0,dv1,itEdge1 );
 }
 
-void Graphics::DrawTriangleFlatTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex,const TexVertex& dv0,const TexVertex& dv1,TexVertex& itEdge1 )
+void Graphics::DrawTriangleFlatTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex,const TexFittingFunctor& func,const TexVertex& dv0,const TexVertex& dv1,TexVertex& itEdge1 )
 {
 	// Get the interpolated edges
 	TexVertex itEdge0 = v0;
@@ -589,10 +589,7 @@ void Graphics::DrawTriangleFlatTex( const TexVertex& v0,const TexVertex& v1,cons
 		for ( int x = xStart; x < xEnd;
 			  ++x,itcLine += dtcLine )
 		{
-			PutPixel( x,y,tex.GetPixel(
-				(unsigned int)std::min( itcLine.x * tex_width,tex_clamp_x ),
-				(unsigned int)std::min( itcLine.y * tex_height,tex_clamp_y )
-			) );
+			PutPixel( x,y,func( tex,itcLine.x,itcLine.y ) );
 		}
 	}
 }
