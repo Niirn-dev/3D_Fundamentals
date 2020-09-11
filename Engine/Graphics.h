@@ -69,6 +69,8 @@ private:
 	void DrawTriangleFlatBottom( const Vec2& v0,const Vec2& v1,const Vec2& v2,Color c );
 	void DrawTriangleFlatTopTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex );
 	void DrawTriangleFlatBottomTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex );
+	void DrawTriangleFlatTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex,
+							  const TexVertex& dv0,const TexVertex& dv1,TexVertex& itEdge1 );
 
 public:
 	void PutPixel( int x,int y,int r,int g,int b )

@@ -536,45 +536,9 @@ void Graphics::DrawTriangleFlatTopTex( const TexVertex& v0,const TexVertex& v1,c
 	const TexVertex dv1 = ( v2 - v1 ) / dy;
 
 	// Get interpolated edges
-	TexVertex itEdge0 = v0;
 	TexVertex itEdge1 = v1;
 
-	// Get start and end for y according to top rule
-	const int yStart = (int)std::ceil( v0.pos.y - 0.5f );
-	const int yEnd = (int)std::ceil( v2.pos.y - 0.5f );
-
-	// Prestep into texture
-	itEdge0 += dv0 * ( (float)yStart + 0.5f - v0.pos.y );
-	itEdge1 += dv1 * ( (float)yStart + 0.5f - v1.pos.y );
-
-	// Init values for texture clamping
-	const float tex_width = (float)tex.GetWidth();
-	const float tex_height = (float)tex.GetHeight();
-	const float tex_clamp_x = tex_width - 1.0f;
-	const float tex_clamp_y = tex_height - 1.0f;
-
-	for ( int y = yStart; y < yEnd; 
-		  ++y,itEdge0 += dv0,itEdge1 += dv1 )
-	{
-		// Get start and end for x according to left rule
-		const int xStart = (int)std::ceil( itEdge0.pos.x - 0.5f );
-		const int xEnd = (int)std::ceil( itEdge1.pos.x - 0.5f );
-
-		// Get the scan step for the texture coordiantes
-		const Vec2 dtcLine = ( itEdge1.tc - itEdge0.tc ) / ( itEdge1.pos.x - itEdge0.pos.x );
-
-		// Do the texture coordinate scan line prestep
-		Vec2 itcLine = itEdge0.tc + dtcLine * ( (float)xStart + 0.5f - itEdge0.pos.x );
-
-		for ( int x = xStart; x < xEnd; 
-			  ++x,itcLine += dtcLine )
-		{
-			PutPixel( x,y,tex.GetPixel(
-				(unsigned int)std::min( itcLine.x * tex_width,tex_clamp_x ),
-				(unsigned int)std::min( itcLine.y * tex_height,tex_clamp_y )
-			) );
-		}
-	}
+	DrawTriangleFlatTex( v0,v1,v2,tex,dv0,dv1,itEdge1 );
 }
 
 void Graphics::DrawTriangleFlatBottomTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex )
@@ -585,8 +549,15 @@ void Graphics::DrawTriangleFlatBottomTex( const TexVertex& v0,const TexVertex& v
 	const TexVertex dv1 = ( v2 - v0 ) / dy;
 
 	// Get the interpolated edges
-	TexVertex itEdge0 = v0;
 	TexVertex itEdge1 = v0;
+
+	DrawTriangleFlatTex( v0,v1,v2,tex,dv0,dv1,itEdge1 );
+}
+
+void Graphics::DrawTriangleFlatTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex,const TexVertex& dv0,const TexVertex& dv1,TexVertex& itEdge1 )
+{
+	// Get the interpolated edges
+	TexVertex itEdge0 = v0;
 
 	// Get the start and end points for y according to top rule
 	const int yStart = (int)std::ceil( v0.pos.y - 0.5f );
