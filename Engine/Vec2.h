@@ -120,9 +120,13 @@ public:
 	{
 		return x == rhs.x && y == rhs.y;
 	}
-	bool	operator!=(const _Vec2 &rhs) const
+	bool	operator!=( const _Vec2 &rhs ) const
 	{
 		return !(*this == rhs);
+	}
+	_Vec2	InterpolateTo( const _Vec2& rhs,T alpha ) const
+	{
+		return *this + ( rhs - *this ) * alpha;
 	}
 public:
 	T x;

@@ -28,6 +28,7 @@
 #include "Cube.h"
 #include <memory>
 #include "Scene.h"
+#include "Surface.h"
 
 class Game
 {
@@ -49,6 +50,7 @@ private:
 	/********************************/
 	/*  User Variables              */
 	PubeScreenTransformer pst;
+	Surface cubeTexture;
 	std::vector<std::unique_ptr<Scene>> scenes;
 	std::vector<std::unique_ptr<Scene>>::iterator curScene;
 	/********************************/

@@ -21,13 +21,16 @@
 #include "MainWindow.h"
 #include "Game.h"
 #include "SolidCubeScene.h"
+#include "TexCubeScene.h"
 
 Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
-	gfx( wnd )
+	gfx( wnd ),
+	cubeTexture( Surface::FromFile( L"Textures\\stone_wall_512x512.png" ) )
 {
 	scenes.push_back( std::make_unique<SolidCubeScene>( pst,1.0f ) );
+	scenes.push_back( std::make_unique<TexCubeScene>( pst,1.0f,cubeTexture ) );
 	curScene = scenes.begin();
 }
 

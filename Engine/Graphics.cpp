@@ -428,6 +428,52 @@ void Graphics::DrawTriangle( const Vec2& v0,const Vec2& v1,const Vec2& v2,Color 
 	}
 }
 
+void Graphics::DrawTriangleTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex )
+{
+	// Get pointers to verts for easier swapping
+	const auto* pv0 = &v0;
+	const auto* pv1 = &v1;
+	const auto* pv2 = &v2;
+
+	// Sort verts by y
+	if ( pv0->pos.y > pv1->pos.y ) std::swap( pv0,pv1 );
+	if ( pv0->pos.y > pv2->pos.y ) std::swap( pv0,pv2 );
+	if ( pv1->pos.y > pv2->pos.y ) std::swap( pv1,pv2 );
+
+	// Establish the type of the passed in triangle
+	if ( pv0->pos.y == pv1->pos.y ) // Flat top triangle
+	{
+		// Sort verts by x
+		if ( pv0->pos.x > pv1->pos.x ) std::swap( pv0,pv1 );
+		DrawTriangleFlatTopTex( *pv0,*pv1,*pv2,tex );
+	}
+	else if ( pv1->pos.y == pv2->pos.y ) // Flat bottom triangle
+	{
+		// Sort verts by x
+		if ( pv1->pos.x > pv2->pos.x ) std::swap( pv1,pv2 );
+		DrawTriangleFlatBottomTex( *pv0,*pv1,*pv2,tex );
+	}
+	else // General triangle
+	{
+		// Find splitting vertex
+		const float splitAlpha =
+			( pv1->pos.y - pv0->pos.y ) /
+			( pv2->pos.y - pv0->pos.y );
+		const auto split = pv0->InterpolateTo( *pv2,splitAlpha );
+
+		if ( split.pos.x > pv1->pos.x ) // Major right triangle
+		{
+			DrawTriangleFlatBottomTex( *pv0,*pv1,split,tex );
+			DrawTriangleFlatTopTex( *pv1,split,*pv2,tex );
+		}
+		else // Major left triangle
+		{
+			DrawTriangleFlatBottomTex( *pv0,split,*pv1,tex );
+			DrawTriangleFlatTopTex( split,*pv1,*pv2,tex );
+		}
+	}
+}
+
 void Graphics::DrawTriangleFlatTop( const Vec2& v0,const Vec2& v1,const Vec2& v2,Color c )
 {
 	// Get slopes for side lines
@@ -440,9 +486,13 @@ void Graphics::DrawTriangleFlatTop( const Vec2& v0,const Vec2& v1,const Vec2& v2
 
 	for ( int y = yStart; y < yEnd; ++y )
 	{
+		// Calculate start and end point based on the center of the pixels (thus + 0.5f)
+		const float px0 = ( ( y + 0.5f - v0.y ) * m0 + v0.x );
+		const float px1 = ( ( y + 0.5f - v1.y ) * m1 + v1.x );
+
 		// Get start and end for x according to left rule
-		const int xStart = (int)std::ceil( ( y - yStart ) * m0 + v0.x - 0.5f);
-		const int xEnd = (int)std::ceil( ( y - yStart ) * m1 + v1.x - 0.5f);
+		const int xStart = (int)std::ceil( px0 - 0.5f );
+		const int xEnd = (int)std::ceil( px1 - 0.5f );
 
 		for ( int x = xStart; x < xEnd; ++x )
 		{
@@ -463,13 +513,132 @@ void Graphics::DrawTriangleFlatBottom( const Vec2& v0,const Vec2& v1,const Vec2&
 
 	for ( int y = yStart; y < yEnd; ++y )
 	{
+		// Calculate start and end point based on the center of the pixels (thus + 0.5f)
+		const float px0 = ( ( y + 0.5f - v0.y ) * m0 + v0.x );
+		const float px1 = ( ( y + 0.5f - v0.y ) * m1 + v0.x );
+
 		// Get start and end for x according to left rule
-		const int xStart = (int)std::ceil( ( y - yStart ) * m0 + v0.x - 0.5f );
-		const int xEnd = (int)std::ceil( ( y - yStart ) * m1 + v0.x - 0.5f );
+		const int xStart = (int)std::ceil( px0 - 0.5f );
+		const int xEnd = (int)std::ceil( px1 - 0.5f );
 
 		for ( int x = xStart; x < xEnd; ++x )
 		{
 			PutPixel( x,y,c );
+		}
+	}
+}
+
+void Graphics::DrawTriangleFlatTopTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex )
+{
+	// Get slopes for side lines
+	const float m0 = ( v2.pos.x - v0.pos.x ) / ( v2.pos.y - v0.pos.y );
+	const float m1 = ( v2.pos.x - v1.pos.x ) / ( v2.pos.y - v1.pos.y );
+
+	// Get start and end for y according to top rule
+	const int yStart = (int)std::ceil( v0.pos.y - 0.5f );
+	const int yEnd = (int)std::ceil( v2.pos.y - 0.5f );
+
+	// Get the texture edges
+	Vec2 tcEdgeL = v0.tc;
+	Vec2 tcEdgeR = v1.tc;
+	const Vec2 tcBottom = v2.tc;
+
+	// Get the steps for the texture coordinates
+	const Vec2 tcStepL = ( tcBottom - tcEdgeL ) / ( v2.pos.y - v0.pos.y );
+	const Vec2 tcStepR = ( tcBottom - tcEdgeR ) / ( v2.pos.y - v1.pos.y );
+
+	// Prestep into texture
+	tcEdgeL += tcStepL * ( (float)yStart + 0.5f - v0.pos.y );
+	tcEdgeR += tcStepR * ( (float)yStart + 0.5f - v1.pos.y );
+
+	// Init values for texture clamping
+	const float tex_width = (float)tex.GetWidth();
+	const float tex_height = (float)tex.GetHeight();
+	const float tex_clamp_x = tex_width - 1.0f;
+	const float tex_clamp_y = tex_height - 1.0f;
+
+	for ( int y = yStart; y < yEnd; 
+		  ++y,tcEdgeL += tcStepL,tcEdgeR += tcStepR )
+	{
+		// Calculate start and end point based on the center of the pixels (thus + 0.5f)
+		const float px0 = ( ( y + 0.5f - v0.pos.y ) * m0 + v0.pos.x );
+		const float px1 = ( ( y + 0.5f - v1.pos.y ) * m1 + v1.pos.x );
+
+		// Get start and end for x according to left rule
+		const int xStart = (int)std::ceil( px0 - 0.5f );
+		const int xEnd = (int)std::ceil( px1 - 0.5f );
+
+		// Get the scan step for the texture coordiantes
+		const Vec2 tcScanStep = ( tcEdgeR - tcEdgeL ) / ( px1 - px0 );
+
+		// Do the texture coordinate scan line prestep
+		Vec2 tc = tcEdgeL + tcScanStep * ( (float)xStart + 0.5f - px0 );
+
+		for ( int x = xStart; x < xEnd; 
+			  ++x,tc += tcScanStep )
+		{
+			PutPixel( x,y,tex.GetPixel(
+				(unsigned int)std::min( tc.x * tex_width,tex_clamp_x ),
+				(unsigned int)std::min( tc.y * tex_height,tex_clamp_y )
+			) );
+		}
+	}
+}
+
+void Graphics::DrawTriangleFlatBottomTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex )
+{
+	// Get the slopes for side lines
+	const float m0 = ( v1.pos.x - v0.pos.x ) / ( v1.pos.y - v0.pos.y );
+	const float m1 = ( v2.pos.x - v0.pos.x ) / ( v2.pos.y - v0.pos.y );
+
+	// Get the start and end points for y according to top rule
+	const int yStart = (int)std::ceil( v0.pos.y - 0.5f );
+	const int yEnd = (int)std::ceil( v2.pos.y - 0.5f );
+
+	// Get the texture edges
+	Vec2 tcEdgeL = v0.tc;
+	Vec2 tcEdgeR = v0.tc;
+	const Vec2 tcBottomL = v1.tc;
+	const Vec2 tcBottomR = v2.tc;
+
+	// Get step for texture edges
+	const Vec2 tcStepL = ( tcBottomL - tcEdgeL ) / ( v1.pos.y - v0.pos.y );
+	const Vec2 tcStepR = ( tcBottomR - tcEdgeR ) / ( v2.pos.y - v0.pos.y );
+
+	// Prestep into texture
+	tcEdgeL += tcStepL * ( (float)yStart + 0.5f - v0.pos.y );
+	tcEdgeR += tcStepR * ( (float)yStart + 0.5f - v0.pos.y );
+
+	// Init values for texture clamping
+	const float tex_width = (float)tex.GetWidth();
+	const float tex_height = (float)tex.GetHeight();
+	const float tex_clamp_x = tex_width - 1.0f;
+	const float tex_clamp_y = tex_height - 1.0f;
+
+	for ( int y = yStart; y < yEnd;
+		  ++y,tcEdgeL += tcStepL,tcEdgeR += tcStepR )
+	{
+		// Calculate start and end point based on the center of the pixels (thus + 0.5f)
+		const float px0 = ( (float)y + 0.5f - v0.pos.y ) * m0 + v0.pos.x;
+		const float px1 = ( (float)y + 0.5f - v0.pos.y ) * m1 + v0.pos.x;
+
+		// Get start and end for x according to left rule
+		const float xStart = (int)std::ceil( px0 - 0.5f );
+		const float xEnd = (int)std::ceil( px1 - 0.5f );
+
+		// Calculate the scan step for the texture
+		const Vec2 tcScanStep = ( tcEdgeR - tcEdgeL ) / ( px1 - px0 );
+
+		// Get texture coordinate and prestep
+		Vec2 tc = tcEdgeL + tcScanStep * ( (float)xStart + 0.5f - px0 );
+
+		for ( int x = xStart; x < xEnd;
+			  ++x,tc += tcScanStep )
+		{
+			PutPixel( x,y,tex.GetPixel(
+				(unsigned int)std::min( tc.x * tex_width,tex_clamp_x ),
+				(unsigned int)std::min( tc.y * tex_height,tex_clamp_y )
+			) );
 		}
 	}
 }
