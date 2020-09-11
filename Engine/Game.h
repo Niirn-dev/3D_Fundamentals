@@ -42,7 +42,7 @@ private:
 	void UpdateModel();
 	/********************************/
 	/*  User Functions              */
-	void CycleScenes();
+	void CycleScenes( bool reverse = false );
 	/********************************/
 private:
 	MainWindow& wnd;

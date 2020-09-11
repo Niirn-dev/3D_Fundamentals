@@ -32,7 +32,7 @@ public:
 		tc.emplace_back( 1.0f,1.0f );
 	}
 
-	IndexedLineList GetLineList() const
+	inline IndexedLineList GetLineList() const
 	{
 		std::vector<size_t> indices = {
 			0,2,1, 0,3,2,
@@ -45,7 +45,7 @@ public:
 		return { verts,std::move( indices ) };
 	}
 
-	IndexedTriangleList<Vec3> GetTriangleList() const
+	inline IndexedTriangleList<Vec3> GetTriangleList() const
 	{
 		std::vector<size_t> indices = {
 			0,2,1, 0,3,2, 
@@ -58,7 +58,7 @@ public:
 		return { verts,std::move( indices ) };
 	}
 
-	IndexedTriangleList<TexVertex> GetTriangleTexList() const
+	inline IndexedTriangleList<TexVertex> GetTriangleTexList() const
 	{
 		std::vector<TexVertex> tverts;
 		tverts.reserve( verts.size() );
@@ -78,7 +78,6 @@ public:
 
 		return { std::move( tverts ),std::move( indices ) };
 	}
-
 
 private:
 	std::vector<Vec3> verts;

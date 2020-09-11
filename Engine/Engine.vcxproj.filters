@@ -99,6 +99,12 @@
     <ClInclude Include="TexFittingFunctors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CubeUnfolded.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TexCubeUnfoldedScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXErr.cpp">

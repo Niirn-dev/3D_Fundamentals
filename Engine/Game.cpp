@@ -22,6 +22,7 @@
 #include "Game.h"
 #include "SolidCubeScene.h"
 #include "TexCubeScene.h"
+#include "TexCubeUnfoldedScene.h"
 
 Game::Game( MainWindow& wnd )
 	:
@@ -31,6 +32,7 @@ Game::Game( MainWindow& wnd )
 {
 	scenes.push_back( std::make_unique<SolidCubeScene>( pst,1.0f ) );
 	scenes.push_back( std::make_unique<TexCubeScene>( pst,1.0f,cubeTexture ) );
+	scenes.push_back( std::make_unique<TexCubeUnfoldedScene>( pst,1.0f,cubeTexture ) );
 	curScene = scenes.begin();
 }
 
@@ -53,17 +55,38 @@ void Game::UpdateModel()
 		auto e = wnd.kbd.ReadKey();
 		if ( e.IsPress() && e.GetCode() == VK_TAB )
 		{
-			CycleScenes();
+			if ( wnd.kbd.KeyIsPressed( VK_CONTROL ) )
+			{
+				CycleScenes( true );
+			}
+			else
+			{
+				CycleScenes();
+			}
 		}
 	}
 }
 
-void Game::CycleScenes()
+void Game::CycleScenes( bool reverse )
 {
-	++curScene;
-	if ( curScene == scenes.end() )
+	if ( !reverse )
 	{
-		curScene = scenes.begin();
+		++curScene;
+		if ( curScene == scenes.end() )
+		{
+			curScene = scenes.begin();
+		}
+	}
+	else
+	{
+		if ( curScene == scenes.begin() )
+		{
+			curScene = std::prev( scenes.end() );
+		}
+		else
+		{
+			--curScene;
+		}
 	}
 }
 

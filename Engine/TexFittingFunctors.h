@@ -33,10 +33,21 @@ public:
 	{
 		const float tex_width = (float)tex.GetWidth();
 		const float tex_height = (float)tex.GetHeight();
+		float x_modded = fmodf( itc_x * tex_width,tex_width );
+		float y_modded = fmodf( itc_y * tex_height,tex_height );
+
+		if ( x_modded < 0.0f )
+		{
+			x_modded += tex_width;
+		}
+		if ( y_modded < 0.0f )
+		{
+			y_modded += tex_height;
+		}
 
 		return tex.GetPixel(
-			(unsigned int)fmodf( itc_x * tex_width,tex_width ),
-			(unsigned int)fmodf( itc_y * tex_height,tex_height )
+			(unsigned int)x_modded,
+			(unsigned int)y_modded
 		);
 	}
 };
