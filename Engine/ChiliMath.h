@@ -42,3 +42,9 @@ inline auto wrap_angle( T angle )
 		modded - T( 2.0 * PI_D ) :
 		modded;
 }
+
+template<typename T>
+inline auto interpolate( const T& lhs,const T& rhs,float alpha )
+{
+	return lhs + ( rhs - lhs ) * alpha;
+}

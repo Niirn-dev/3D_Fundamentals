@@ -1,85 +1,45 @@
 #pragma once
 
+#include "Vec2.h"
 #include "Vec3.h"
 #include <vector>
 #include "IndexedLineList.h"
 #include "IndexedTriangleList.h"
+#include "Pipeline.h"
 
 class Cube
 {
 public:
-	Cube( float size )
+	static inline IndexedTriangleList<Pipeline::Vertex> MakeUnfolded( float size )
 	{
 		const float side = size / 2.0f;
 
-		verts.reserve( 8 );
-		tc.reserve( 8 );
-		verts.emplace_back( -side,-side,-side );
-		tc.emplace_back( 0.0f,1.0f );
-		verts.emplace_back( side,-side,-side );
-		tc.emplace_back( 1.0f,1.0f );
-		verts.emplace_back( side,side,-side );
-		tc.emplace_back( 1.0f,0.0f );
-		verts.emplace_back( -side,side,-side );
-		tc.emplace_back( 0.0f,0.0f );
-		verts.emplace_back( -side,side,side );
-		tc.emplace_back( 1.0f,0.0f );
-		verts.emplace_back( side,side,side );
-		tc.emplace_back( 0.0f,0.0f );
-		verts.emplace_back( side,-side,side );
-		tc.emplace_back( 0.0f,1.0f );
-		verts.emplace_back( -side,-side,side );
-		tc.emplace_back( 1.0f,1.0f );
-	}
-
-	inline IndexedLineList GetLineList() const
-	{
-		std::vector<size_t> indices = {
-			0,2,1, 0,3,2,
-			7,4,3, 0,7,3,
-			0,1,6, 0,6,7,
-			1,2,5, 1,5,6,
-			2,3,4, 2,4,5,
-			6,5,4, 6,4,7
-		};
-		return { verts,std::move( indices ) };
-	}
-
-	inline IndexedTriangleList<Vec3> GetTriangleList() const
-	{
-		std::vector<size_t> indices = {
-			0,2,1, 0,3,2, 
-			7,4,3, 0,7,3,
-			0,1,6, 0,6,7,
-			1,2,5, 1,5,6,
-			2,3,4, 2,4,5,
-			6,5,4, 6,4,7
-		};
-		return { verts,std::move( indices ) };
-	}
-
-	inline IndexedTriangleList<TexVertex> GetTriangleTexList() const
-	{
-		std::vector<TexVertex> tverts;
-		tverts.reserve( verts.size() );
-		for ( size_t i = 0; i < verts.size(); ++i )
-		{
-			tverts.emplace_back( verts[i],tc[i] );
-		}
+		std::vector<Pipeline::Vertex> vertices;
+		vertices.reserve( 14 );
+		vertices.emplace_back( Vec3{ -side, side,-side },Vec2{  0.0f, 0.0f } ); // 0
+		vertices.emplace_back( Vec3{  side, side,-side },Vec2{  1.0f, 0.0f } );	// 1
+		vertices.emplace_back( Vec3{ -side,-side,-side },Vec2{  0.0f, 1.0f } );	// 2
+		vertices.emplace_back( Vec3{  side,-side,-side },Vec2{  1.0f, 1.0f } );	// 3
+		vertices.emplace_back( Vec3{  side,-side, side },Vec2{  2.0f, 1.0f } );	// 4
+		vertices.emplace_back( Vec3{  side, side, side },Vec2{  2.0f, 0.0f } );	// 5
+		vertices.emplace_back( Vec3{ -side, side, side },Vec2{  3.0f, 0.0f } );	// 6
+		vertices.emplace_back( Vec3{ -side,-side, side },Vec2{  3.0f, 1.0f } );	// 7
+		vertices.emplace_back( Vec3{ -side,-side,-side },Vec2{  4.0f, 1.0f } );	// 8
+		vertices.emplace_back( Vec3{ -side, side,-side },Vec2{  4.0f, 0.0f } );	// 9
+		vertices.emplace_back( Vec3{ -side, side,-side },Vec2{  1.0f,-1.0f } );	// 10
+		vertices.emplace_back( Vec3{ -side, side, side },Vec2{  2.0f,-1.0f } );	// 11
+		vertices.emplace_back( Vec3{ -side,-side,-side },Vec2{  1.0f, 2.0f } );	// 12
+		vertices.emplace_back( Vec3{ -side,-side, side },Vec2{  2.0f, 2.0f } );	// 13
 
 		std::vector<size_t> indices = {
-			0,2,1, 0,3,2,
-			7,4,3, 0,7,3,
-			0,1,6, 0,6,7,
-			1,2,5, 1,5,6,
-			2,3,4, 2,4,5,
-			6,5,4, 6,4,7
+			0,1,2,   2,1,3,
+			1,4,3,   4,1,5,
+			5,6,4,   4,6,7,
+			6,8,7,   8,6,9,
+			1,10,11, 11,5,1,
+			4,13,12, 12,3,4
 		};
 
-		return { std::move( tverts ),std::move( indices ) };
+		return { vertices,indices };
 	}
-
-private:
-	std::vector<Vec3> verts;
-	std::vector<Vec2> tc;
 };

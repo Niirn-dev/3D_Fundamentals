@@ -15,10 +15,8 @@ public:
 	{
 		assert( this->vertices.size() > 2 );
 		assert( this->indices.size() % 3 == 0 );
-		cullingMask.resize( this->indices.size() / 3,true );
 	}
 
 	std::vector<T> vertices;
 	std::vector<size_t> indices;
-	std::vector<bool> cullingMask;
 };

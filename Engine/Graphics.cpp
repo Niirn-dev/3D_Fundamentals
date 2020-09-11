@@ -428,52 +428,6 @@ void Graphics::DrawTriangle( const Vec2& v0,const Vec2& v1,const Vec2& v2,Color 
 	}
 }
 
-void Graphics::DrawTriangleTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex,const TexFittingFunctor& func )
-{
-	// Get pointers to verts for easier swapping
-	const auto* pv0 = &v0;
-	const auto* pv1 = &v1;
-	const auto* pv2 = &v2;
-
-	// Sort verts by y
-	if ( pv0->pos.y > pv1->pos.y ) std::swap( pv0,pv1 );
-	if ( pv0->pos.y > pv2->pos.y ) std::swap( pv0,pv2 );
-	if ( pv1->pos.y > pv2->pos.y ) std::swap( pv1,pv2 );
-
-	// Establish the type of the passed in triangle
-	if ( pv0->pos.y == pv1->pos.y ) // Flat top triangle
-	{
-		// Sort verts by x
-		if ( pv0->pos.x > pv1->pos.x ) std::swap( pv0,pv1 );
-		DrawTriangleFlatTopTex( *pv0,*pv1,*pv2,tex,func );
-	}
-	else if ( pv1->pos.y == pv2->pos.y ) // Flat bottom triangle
-	{
-		// Sort verts by x
-		if ( pv1->pos.x > pv2->pos.x ) std::swap( pv1,pv2 );
-		DrawTriangleFlatBottomTex( *pv0,*pv1,*pv2,tex,func );
-	}
-	else // General triangle
-	{
-		// Find splitting vertex
-		const float splitAlpha =
-			( pv1->pos.y - pv0->pos.y ) /
-			( pv2->pos.y - pv0->pos.y );
-		const auto split = pv0->InterpolateTo( *pv2,splitAlpha );
-
-		if ( split.pos.x > pv1->pos.x ) // Major right triangle
-		{
-			DrawTriangleFlatBottomTex( *pv0,*pv1,split,tex,func );
-			DrawTriangleFlatTopTex( *pv1,split,*pv2,tex,func );
-		}
-		else // Major left triangle
-		{
-			DrawTriangleFlatBottomTex( *pv0,split,*pv1,tex,func );
-			DrawTriangleFlatTopTex( split,*pv1,*pv2,tex,func );
-		}
-	}
-}
-
 void Graphics::DrawTriangleFlatTop( const Vec2& v0,const Vec2& v1,const Vec2& v2,Color c )
 {
 	// Get slopes for side lines
@@ -524,72 +478,6 @@ void Graphics::DrawTriangleFlatBottom( const Vec2& v0,const Vec2& v1,const Vec2&
 		for ( int x = xStart; x < xEnd; ++x )
 		{
 			PutPixel( x,y,c );
-		}
-	}
-}
-
-void Graphics::DrawTriangleFlatTopTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex,const TexFittingFunctor& func )
-{
-	// Get dVertex / dy
-	const float dy = v2.pos.y - v0.pos.y;
-	const TexVertex dv0 = ( v2 - v0 ) / dy;
-	const TexVertex dv1 = ( v2 - v1 ) / dy;
-
-	// Get interpolated edges
-	TexVertex itEdge1 = v1;
-
-	DrawTriangleFlatTex( v0,v1,v2,tex,func,dv0,dv1,itEdge1 );
-}
-
-void Graphics::DrawTriangleFlatBottomTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex,const TexFittingFunctor& func )
-{
-	// Get dVertex / dy
-	const float dy = v2.pos.y - v0.pos.y;
-	const TexVertex dv0 = ( v1 - v0 ) / dy;
-	const TexVertex dv1 = ( v2 - v0 ) / dy;
-
-	// Get the interpolated edges
-	TexVertex itEdge1 = v0;
-
-	DrawTriangleFlatTex( v0,v1,v2,tex,func,dv0,dv1,itEdge1 );
-}
-
-void Graphics::DrawTriangleFlatTex( const TexVertex& v0,const TexVertex& v1,const TexVertex& v2,const Surface& tex,const TexFittingFunctor& func,const TexVertex& dv0,const TexVertex& dv1,TexVertex& itEdge1 )
-{
-	// Get the interpolated edges
-	TexVertex itEdge0 = v0;
-
-	// Get the start and end points for y according to top rule
-	const int yStart = (int)std::ceil( v0.pos.y - 0.5f );
-	const int yEnd = (int)std::ceil( v2.pos.y - 0.5f );
-
-	// Prestep into texture
-	itEdge0 += dv0 * ( (float)yStart + 0.5f - v0.pos.y );
-	itEdge1 += dv1 * ( (float)yStart + 0.5f - v0.pos.y );
-
-	// Init values for texture clamping
-	const float tex_width = (float)tex.GetWidth();
-	const float tex_height = (float)tex.GetHeight();
-	const float tex_clamp_x = tex_width - 1.0f;
-	const float tex_clamp_y = tex_height - 1.0f;
-
-	for ( int y = yStart; y < yEnd;
-		  ++y,itEdge0 += dv0,itEdge1 += dv1 )
-	{
-		// Get start and end for x according to left rule
-		const int xStart = (int)std::ceil( itEdge0.pos.x - 0.5f );
-		const int xEnd = (int)std::ceil( itEdge1.pos.x - 0.5f );
-
-		// Calculate the scan step for the texture
-		const Vec2 dtcLine = ( itEdge1.tc - itEdge0.tc ) / ( itEdge1.pos.x - itEdge0.pos.x );
-
-		// Get texture coordinate and prestep
-		Vec2 itcLine = itEdge0.tc + dtcLine * ( (float)xStart + 0.5f - itEdge0.pos.x );
-
-		for ( int x = xStart; x < xEnd;
-			  ++x,itcLine += dtcLine )
-		{
-			PutPixel( x,y,func( tex,itcLine.x,itcLine.y ) );
 		}
 	}
 }

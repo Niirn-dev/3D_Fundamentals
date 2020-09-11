@@ -87,22 +87,16 @@
     <ClInclude Include="Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SolidCubeScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TexVertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TexCubeScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TexFittingFunctors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CubeUnfolded.h">
+    <ClInclude Include="TexCubeUnfoldedScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TexCubeUnfoldedScene.h">
+    <ClInclude Include="Pipeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Triangle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

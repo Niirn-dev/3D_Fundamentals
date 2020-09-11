@@ -20,19 +20,14 @@
 ******************************************************************************************/
 #include "MainWindow.h"
 #include "Game.h"
-#include "SolidCubeScene.h"
-#include "TexCubeScene.h"
 #include "TexCubeUnfoldedScene.h"
 
 Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
-	gfx( wnd ),
-	cubeTexture( Surface::FromFile( L"Textures\\stone_wall_512x512.png" ) )
+	gfx( wnd )
 {
-	scenes.push_back( std::make_unique<SolidCubeScene>( pst,1.0f ) );
-	scenes.push_back( std::make_unique<TexCubeScene>( pst,1.0f,cubeTexture ) );
-	scenes.push_back( std::make_unique<TexCubeUnfoldedScene>( pst,1.0f,cubeTexture ) );
+	scenes.push_back( std::make_unique<TexCubeUnfoldedScene>( gfx,1.0f,L"Textures\\stone_wall_512x512.png" ) );
 	curScene = scenes.begin();
 }
 
@@ -92,5 +87,5 @@ void Game::CycleScenes( bool reverse )
 
 void Game::ComposeFrame()
 {
-	( *curScene )->Draw( gfx );
+	( *curScene )->Draw();
 }

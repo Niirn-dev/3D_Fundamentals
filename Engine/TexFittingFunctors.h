@@ -45,9 +45,12 @@ public:
 			y_modded += tex_height;
 		}
 
+		const float tex_clamp_x = tex_width - 1.0f;
+		const float tex_clamp_y = tex_height - 1.0f;
+
 		return tex.GetPixel(
-			(unsigned int)x_modded,
-			(unsigned int)y_modded
+			(unsigned int)std::min( x_modded,tex_clamp_x ),
+			(unsigned int)std::min( y_modded,tex_clamp_y )
 		);
 	}
 };

@@ -2,25 +2,26 @@
 
 #include "ChiliWin.h"
 #include "Scene.h"
-#include "CubeUnfolded.h"
+#include "Cube.h"
 #include "IndexedTriangleList.h"
 #include "Mat3.h"
 #include "PubeScreenTransformer.h"
 #include "Surface.h"
-#include "TexVertex.h"
 #include "TexFittingFunctors.h"
 #include <memory>
+#include "Pipeline.h"
 
 class TexCubeUnfoldedScene : public Scene
 {
 public:
-	TexCubeUnfoldedScene( PubeScreenTransformer& pst,float cubeSize,const Surface& tex )
+	TexCubeUnfoldedScene( Graphics& gfx,float cubeSize,const std::wstring& texFilePath )
 		:
-		pst( pst ),
-		c( cubeSize ),
-		texFitting( std::make_unique<TexWrap>() ),
-		tex( tex )
+		pipeline( gfx ),
+		itlist( Cube::MakeUnfolded( cubeSize ) ),
+		texFitting( std::make_unique<TexWrap>() )
 	{
+		pipeline.BindTexture( texFilePath );
+		pipeline.BindTextureFitter( std::make_unique<TexWrap>() );
 	}
 
 	void Update( Keyboard& kbd,Mouse& mouse,float dt ) override
@@ -54,65 +55,31 @@ public:
 
 		if ( kbd.KeyIsPressed( 'R' ) )
 		{
-			offsetZ = offsetZ + 2.0f * dt;
+			translation = Vec3{ 0.0f,0.0f,translation.z + 2.0f * dt };
 		}
 		if ( kbd.KeyIsPressed( 'F' ) )
 		{
-			offsetZ = std::max( 2.0f,offsetZ - 2.0f * dt );;
+			translation = Vec3{ 0.0f,0.0f,std::max( 2.0f,translation.z - 2.0f * dt ) };
 		}
 	}
-	void Draw( Graphics& gfx ) override
+	void Draw() override
 	{
-		auto list = c.GetTriangleTexList();
-
-		auto rot =
+		pipeline.BindRotation(
 			Mat3::RotationX( angleX ) *
 			Mat3::RotationY( angleY ) *
-			Mat3::RotationZ( angleZ );
-		for ( auto& tv : list.vertices )
-		{
-			tv.pos *= rot;
-			tv.pos.z += offsetZ;
-		}
+			Mat3::RotationZ( angleZ ) );
+		pipeline.BindTranslation( translation );
 
-		for ( size_t i = 0; i < list.indices.size() / 3; ++i )
-		{
-			const TexVertex& v0 = list.vertices[list.indices[3 * i]];
-			const TexVertex& v1 = list.vertices[list.indices[3 * i + 1]];
-			const TexVertex& v2 = list.vertices[list.indices[3 * i + 2]];
-
-			if ( ( v1.pos - v0.pos ) % ( v2.pos - v0.pos ) * v0.pos >= 0.0f )
-			{
-				list.cullingMask[i] = false;
-			}
-		}
-
-		for ( auto& tv : list.vertices )
-		{
-			pst.Transform( tv.pos );
-		}
-
-		for ( size_t i = 0; i < list.indices.size() / 3; ++i )
-		{
-			if ( list.cullingMask[i] )
-			{
-				gfx.DrawTriangleTex(
-					list.vertices[list.indices[3 * i]],
-					list.vertices[list.indices[3 * i + 1]],
-					list.vertices[list.indices[3 * i + 2]],
-					tex,
-					*texFitting );
-			}
-		}
+		pipeline.Draw( itlist );
 	}
 private:
-	PubeScreenTransformer& pst;
-	CubeUnfolded c;
+	Pipeline pipeline;
+	IndexedTriangleList<Pipeline::Vertex> itlist;
 	std::unique_ptr<TexFittingFunctor> texFitting;
-	const Surface& tex;
-	static constexpr float dTheta = PI / 4.0f;
+
+	static constexpr float dTheta = PI / 2.0f;
 	float angleX = 0.0f;
 	float angleY = 0.0f;
 	float angleZ = 0.0f;
-	float offsetZ = 3.0f;
+	Vec3 translation = { 0.0f,0.0f,3.0f };
 };
