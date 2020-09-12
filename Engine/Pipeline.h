@@ -9,81 +9,21 @@
 #include "Graphics.h"
 #include "PubeScreenTransformer.h"
 #include "Surface.h"
-#include "TexFittingFunctors.h"
 #include <string>
 #include <memory>
 #include "ChiliMath.h"
 #include <cmath>
 
+template<class Effect>
 class Pipeline
 {
 public:
-	class Vertex
-	{
-	public:
-		Vertex( const Vec3& pos,const Vec2& tc )
-			:
-			pos( pos ),
-			tc( tc )
-		{}
-		Vertex& operator=( const Vertex& rhs )
-		{
-			pos = rhs.pos;
-			tc = rhs.tc;
-			return *this;
-		}
-		Vertex& operator+=( const Vertex& rhs )
-		{
-			pos += rhs.pos;
-			tc += rhs.tc;
-			return *this;
-		}
-		Vertex& operator-=( const Vertex& rhs )
-		{
-			pos -= rhs.pos;
-			tc -= rhs.tc;
-			return *this;
-		}
-		Vertex	operator+( const Vertex& rhs ) const
-		{
-			return Vertex( *this ) += rhs;
-		}
-		Vertex	operator-( const Vertex& rhs ) const
-		{
-			return Vertex( *this ) -= rhs;
-		}
-		Vertex& operator*=( const float& rhs )
-		{
-			pos *= rhs;
-			tc *= rhs;
-			return *this;
-		}
-		Vertex	operator*( const float& rhs ) const
-		{
-			return Vertex( *this ) *= rhs;
-		}
-		Vertex& operator/=( const float& rhs )
-		{
-			pos /= rhs;
-			tc /= rhs;
-			return *this;
-		}
-		Vertex	operator/( const float& rhs ) const
-		{
-			return Vertex( *this ) /= rhs;
-		}
-
-	public:
-		Vec3 pos;
-		Vec2 tc;
-	};
+	using Vertex = typename Effect::Vertex;
 public:
 	Pipeline( Graphics& gfx )
 		:
 		gfx( gfx )
 	{
-		// Set texture fit to clamp by default
-		pTexFit = std::make_unique<TexClamp>();
 	}
 
 	void BindRotation( const Mat3& rot )
@@ -94,14 +34,6 @@ public:
 	{
 		translation = trans;
 	}
-	void BindTexture( const std::wstring& filepath )
-	{
-		pTex = std::make_unique<Surface>( Surface::FromFile( filepath ) );
-	}
-	void BindTextureFitter( std::unique_ptr<TexFittingFunctor> ptf )
-	{
-		pTexFit = std::move( ptf );
-	}
 	void Draw( const IndexedTriangleList<Vertex>& list )
 	{
 		ProcessVertices( list.vertices,list.indices );
@@ -111,13 +43,13 @@ private:
 	// Vertex Transformer
 	void ProcessVertices( const std::vector<Vertex>& verts,const std::vector<size_t>& indices )
 	{
-		std::vector<Vertex> vertices = verts;
-		for ( auto& v : vertices )
+		std::vector<Vertex> verticesOut;
+		verticesOut.reserve( verts.size() );
+		for ( const auto& v : verts )
 		{
-			v.pos *= rotation;
-			v.pos += translation;
+			verticesOut.emplace_back( v.pos * rotation + translation,v );
 		}
-		AssembleTriangles( vertices,indices );
+		AssembleTriangles( verticesOut,indices );
 	}
 
 	// Triangle Assembler
@@ -258,16 +190,16 @@ private:
 			for ( int x = xStart; x < xEnd;
 				  ++x,itcLine += dtcLine )
 			{
-				gfx.PutPixel( x,y,(*pTexFit)( *pTex,itcLine.x,itcLine.y ) );
+				gfx.PutPixel( x,y,effect.ps( itcLine ) );
 			}
 		}
 	}
 
+public:
+	Effect effect;
 private:
 	Graphics& gfx;
 	PubeScreenTransformer pst;
-	std::unique_ptr<Surface> pTex;
-	std::unique_ptr<TexFittingFunctor> pTexFit;
 	Mat3 rotation = Mat3::Identity();
 	Vec3 translation = { 0.0f,0.0f,0.0f };
 };

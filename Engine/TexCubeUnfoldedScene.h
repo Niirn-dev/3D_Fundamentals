@@ -7,21 +7,22 @@
 #include "Mat3.h"
 #include "PubeScreenTransformer.h"
 #include "Surface.h"
-#include "TexFittingFunctors.h"
 #include <memory>
 #include "Pipeline.h"
+#include "TextureEffectWrap.h"
 
 class TexCubeUnfoldedScene : public Scene
 {
 public:
+	using Pipeline = Pipeline<TextureEffectWrap>;
+	using Vertex = Pipeline::Vertex;
+public:
 	TexCubeUnfoldedScene( Graphics& gfx,float cubeSize,const std::wstring& texFilePath )
 		:
 		pipeline( gfx ),
-		itlist( Cube::MakeUnfolded( cubeSize ) ),
-		texFitting( std::make_unique<TexWrap>() )
+		itlist( Cube::MakeUnfolded<Vertex>( cubeSize ) )
 	{
-		pipeline.BindTexture( texFilePath );
-		pipeline.BindTextureFitter( std::make_unique<TexWrap>() );
+		pipeline.effect.ps.BindTexture( texFilePath );
 	}
 
 	void Update( Keyboard& kbd,Mouse& mouse,float dt ) override
@@ -75,7 +76,6 @@ public:
 private:
 	Pipeline pipeline;
 	IndexedTriangleList<Pipeline::Vertex> itlist;
-	std::unique_ptr<TexFittingFunctor> texFitting;
 
 	static constexpr float dTheta = PI / 2.0f;
 	float angleX = 0.0f;

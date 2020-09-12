@@ -10,11 +10,12 @@
 class Cube
 {
 public:
-	static inline IndexedTriangleList<Pipeline::Vertex> MakeUnfolded( float size )
+	template<class V>
+	static inline IndexedTriangleList<V> MakeUnfolded( float size )
 	{
 		const float side = size / 2.0f;
 
-		std::vector<Pipeline::Vertex> vertices;
+		std::vector<V> vertices;
 		vertices.reserve( 14 );
 		vertices.emplace_back( Vec3{ -side, side,-side },Vec2{  0.0f, 0.0f } ); // 0
 		vertices.emplace_back( Vec3{  side, side,-side },Vec2{  1.0f, 0.0f } );	// 1

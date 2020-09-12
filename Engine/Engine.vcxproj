@@ -163,7 +163,8 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Surface.h" />
     <ClInclude Include="TexCubeUnfoldedScene.h" />
-    <ClInclude Include="TexFittingFunctors.h" />
+    <ClInclude Include="TextureEffectClamp.h" />
+    <ClInclude Include="TextureEffectWrap.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="Vec2.h" />
     <ClInclude Include="Vec3.h" />
