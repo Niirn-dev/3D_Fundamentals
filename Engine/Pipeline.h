@@ -93,9 +93,9 @@ private:
 	void ProcessTriangleVertices( Triangle<Vertex>& triangle )
 	{
 		// apply perspective divide and screen transform to all 3 verices
-		pst.Transform( triangle.v0.pos );
-		pst.Transform( triangle.v1.pos );
-		pst.Transform( triangle.v2.pos );
+		pst.Transform( triangle.v0 );
+		pst.Transform( triangle.v1 );
+		pst.Transform( triangle.v2 );
 
 		// draw the triangle
 		DrawTriangle( triangle );
@@ -196,20 +196,30 @@ private:
 		for ( int y = yStart; y < yEnd;
 			  ++y,itEdge0 += dv0,itEdge1 += dv1 )
 		{
-			// Get start and end for x according to left rule
+			// get start and end for x according to left rule
 			const int xStart = (int)std::ceil( itEdge0.pos.x - 0.5f );
 			const int xEnd = (int)std::ceil( itEdge1.pos.x - 0.5f );
 
-			// Calculate the scan step for the texture
-			const auto dtcLine = ( itEdge1.tc - itEdge0.tc ) / ( itEdge1.pos.x - itEdge0.pos.x );
+			// get the starting point for scanline interpolant
+			auto itcLine = itEdge0;
 
-			// Get texture coordinate and prestep
-			auto itcLine = itEdge0.tc + dtcLine * ( (float)xStart + 0.5f - itEdge0.pos.x );
+			// calculate delta scan line interpolant / dx
+			const auto dx = itEdge1.pos.x - itEdge0.pos.x;
+			const auto dtcLine = ( itEdge1 - itcLine ) / dx;
+
+			// prestep scanline interpolant
+			itcLine += dtcLine * ( (float)xStart + 0.5f - itEdge0.pos.x );
 
 			for ( int x = xStart; x < xEnd;
 				  ++x,itcLine += dtcLine )
 			{
-				gfx.PutPixel( x,y,effect.ps( itcLine ) );
+				// recover interpolated z from interpolated 1/z
+				const float z = 1.0f / itcLine.pos.z;
+				// recover interpolated attributes
+				const auto attr = itcLine * z;
+				// invoke pixel shader with interpolated vertex attributes
+				// and use result to set the pixel color on the screen
+				gfx.PutPixel( x,y,effect.ps( attr.tc ) );
 			}
 		}
 	}

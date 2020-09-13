@@ -13,16 +13,29 @@ public:
 	{
 	}
 
-	Vec3& Transform( Vec3& v )
+	template<class Vertex>
+	Vertex& Transform( Vertex& v )
 	{
-		const float zInv = 1.0f / v.z;
-		v.x = ( v.x * zInv + 1.0f ) * xFactor;
-		v.y = ( -v.y * zInv + 1.0f ) * yFactor;
+		// calculate the inverse of z coordinate
+		const float zInv = 1.0f / v.pos.z;
+
+		// apply perspective divide for the entire vertex
+		v *= zInv;
+
+		// transform vertex position from view space to screen space
+		v.pos.x = ( v.pos.x + 1.0f ) * xFactor;
+		v.pos.y = ( -v.pos.y + 1.0f ) * yFactor;
+
+		// store the inverse of z in the z coordinate of the vertex 
+		// to be able to restore the interpolated z coordinate later
+		v.pos.z = zInv;
+
 		return v;
 	}
-	Vec3 GetTransformed( const Vec3& v )
+	template<class Vertex>
+	Vertex GetTransformed( const Vertex& v )
 	{
-		return Transform( Vec3( v ) );
+		return Transform( Vertex( v ) );
 	}
 
 private:
