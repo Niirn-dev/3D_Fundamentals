@@ -108,6 +108,12 @@
     <ClInclude Include="TextureEffectWrap.h">
       <Filter>Header Files\Effects</Filter>
     </ClInclude>
+    <ClInclude Include="BlendColorEffect.h">
+      <Filter>Header Files\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="BlendColorCubeScene.h">
+      <Filter>Header Files\Scenes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXErr.cpp">

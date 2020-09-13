@@ -20,6 +20,9 @@
 ******************************************************************************************/
 #pragma once
 
+#include "Vec3.h"
+#include <algorithm>
+
 class Color
 {
 public:
@@ -50,6 +53,21 @@ public:
 	{
 		dword = color.dword;
 		return *this;
+	}
+	explicit Color( const Vec3& vc )
+		:
+		Color( (unsigned char)( std::clamp( vc.x,0.0f,1.0f ) * 255.0f ),
+			   (unsigned char)( std::clamp( vc.y,0.0f,1.0f ) * 255.0f ),
+			   (unsigned char)( std::clamp( vc.z,0.0f,1.0f ) * 255.0f ) )
+	{
+	}
+	explicit operator Vec3() const
+	{
+		return {
+			(float)GetR() / 255.0f,
+			(float)GetG() / 255.0f,
+			(float)GetB() / 255.0f
+		};
 	}
 	constexpr unsigned char GetX() const
 	{

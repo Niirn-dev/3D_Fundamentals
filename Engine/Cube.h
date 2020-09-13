@@ -17,20 +17,20 @@ public:
 
 		std::vector<V> vertices;
 		vertices.reserve( 14 );
-		vertices.emplace_back( Vec3{ -side, side,-side },Vec2{  0.0f, 0.0f } ); // 0
-		vertices.emplace_back( Vec3{  side, side,-side },Vec2{  1.0f, 0.0f } );	// 1
-		vertices.emplace_back( Vec3{ -side,-side,-side },Vec2{  0.0f, 1.0f } );	// 2
-		vertices.emplace_back( Vec3{  side,-side,-side },Vec2{  1.0f, 1.0f } );	// 3
-		vertices.emplace_back( Vec3{  side,-side, side },Vec2{  2.0f, 1.0f } );	// 4
-		vertices.emplace_back( Vec3{  side, side, side },Vec2{  2.0f, 0.0f } );	// 5
-		vertices.emplace_back( Vec3{ -side, side, side },Vec2{  3.0f, 0.0f } );	// 6
-		vertices.emplace_back( Vec3{ -side,-side, side },Vec2{  3.0f, 1.0f } );	// 7
-		vertices.emplace_back( Vec3{ -side,-side,-side },Vec2{  4.0f, 1.0f } );	// 8
-		vertices.emplace_back( Vec3{ -side, side,-side },Vec2{  4.0f, 0.0f } );	// 9
-		vertices.emplace_back( Vec3{ -side, side,-side },Vec2{  1.0f,-1.0f } );	// 10
-		vertices.emplace_back( Vec3{ -side, side, side },Vec2{  2.0f,-1.0f } );	// 11
-		vertices.emplace_back( Vec3{ -side,-side,-side },Vec2{  1.0f, 2.0f } );	// 12
-		vertices.emplace_back( Vec3{ -side,-side, side },Vec2{  2.0f, 2.0f } );	// 13
+		vertices.emplace_back( Vec3{ -side, side,-side },Vec2{ 0.0f, 0.0f } ); // 0
+		vertices.emplace_back( Vec3{  side, side,-side },Vec2{ 1.0f, 0.0f } ); // 1
+		vertices.emplace_back( Vec3{ -side,-side,-side },Vec2{ 0.0f, 1.0f } ); // 2
+		vertices.emplace_back( Vec3{  side,-side,-side },Vec2{ 1.0f, 1.0f } ); // 3
+		vertices.emplace_back( Vec3{  side,-side, side },Vec2{ 2.0f, 1.0f } ); // 4
+		vertices.emplace_back( Vec3{  side, side, side },Vec2{ 2.0f, 0.0f } ); // 5
+		vertices.emplace_back( Vec3{ -side, side, side },Vec2{ 3.0f, 0.0f } ); // 6
+		vertices.emplace_back( Vec3{ -side,-side, side },Vec2{ 3.0f, 1.0f } ); // 7
+		vertices.emplace_back( Vec3{ -side,-side,-side },Vec2{ 4.0f, 1.0f } ); // 8
+		vertices.emplace_back( Vec3{ -side, side,-side },Vec2{ 4.0f, 0.0f } ); // 9
+		vertices.emplace_back( Vec3{ -side, side,-side },Vec2{ 1.0f,-1.0f } ); // 10
+		vertices.emplace_back( Vec3{ -side, side, side },Vec2{ 2.0f,-1.0f } ); // 11
+		vertices.emplace_back( Vec3{ -side,-side,-side },Vec2{ 1.0f, 2.0f } ); // 12
+		vertices.emplace_back( Vec3{ -side,-side, side },Vec2{ 2.0f, 2.0f } ); // 13
 
 		std::vector<size_t> indices = {
 			0,1,2,   2,1,3,
@@ -41,6 +41,41 @@ public:
 			4,13,12, 12,3,4
 		};
 
-		return { vertices,indices };
+		return { std::move( vertices ),std::move( indices ) };
+	}
+
+	template<class V>
+	static inline IndexedTriangleList<V> MakePlain( float size )
+	{
+		const float side = size / 2.0f;
+
+		std::vector<Vec3> pos;
+		pos.reserve( 8 );
+		pos.emplace_back( -side, side,-side ); // 0
+		pos.emplace_back(  side, side,-side ); // 1
+		pos.emplace_back( -side,-side,-side ); // 2
+		pos.emplace_back(  side,-side,-side ); // 3
+		pos.emplace_back(  side,-side, side ); // 4
+		pos.emplace_back(  side, side, side ); // 5
+		pos.emplace_back( -side, side, side ); // 6
+		pos.emplace_back( -side,-side, side ); // 7
+
+		std::vector<V> vertices;
+		vertices.resize( pos.size() );
+		for ( size_t i = 0; i < vertices.size(); ++i )
+		{
+			vertices[i].pos = pos[i];
+		}
+
+		std::vector<size_t> indices = {
+			0,1,2, 2,1,3,
+			1,4,3, 4,1,5,
+			5,6,4, 4,6,7,
+			6,2,7, 2,6,0,
+			1,0,6, 6,5,1,
+			4,7,2, 2,3,4
+		};
+
+		return { std::move( vertices ),std::move( indices ) };
 	}
 };

@@ -21,6 +21,7 @@
 #include "MainWindow.h"
 #include "Game.h"
 #include "TexCubeUnfoldedScene.h"
+#include "BlendColorCubeScene.h"
 
 Game::Game( MainWindow& wnd )
 	:
@@ -28,6 +29,7 @@ Game::Game( MainWindow& wnd )
 	gfx( wnd )
 {
 	scenes.push_back( std::make_unique<TexCubeUnfoldedScene>( gfx,1.0f,L"Textures\\stone_wall_512x512.png" ) );
+	scenes.push_back( std::make_unique<BlendColorCubeScene>( gfx,1.0f ) );
 	curScene = scenes.begin();
 }
 

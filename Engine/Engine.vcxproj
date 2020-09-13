@@ -140,6 +140,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BlendColorCubeScene.h" />
+    <ClInclude Include="BlendColorEffect.h" />
     <ClInclude Include="ChiliException.h" />
     <ClInclude Include="ChiliMath.h" />
     <ClInclude Include="ChiliWin.h" />

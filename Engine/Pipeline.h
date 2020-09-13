@@ -182,10 +182,10 @@ private:
 			const int xEnd = (int)std::ceil( itEdge1.pos.x - 0.5f );
 
 			// Calculate the scan step for the texture
-			const Vec2 dtcLine = ( itEdge1.tc - itEdge0.tc ) / ( itEdge1.pos.x - itEdge0.pos.x );
+			const auto dtcLine = ( itEdge1.tc - itEdge0.tc ) / ( itEdge1.pos.x - itEdge0.pos.x );
 
 			// Get texture coordinate and prestep
-			Vec2 itcLine = itEdge0.tc + dtcLine * ( (float)xStart + 0.5f - itEdge0.pos.x );
+			auto itcLine = itEdge0.tc + dtcLine * ( (float)xStart + 0.5f - itEdge0.pos.x );
 
 			for ( int x = xStart; x < xEnd;
 				  ++x,itcLine += dtcLine )
