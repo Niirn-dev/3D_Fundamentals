@@ -13,6 +13,7 @@
 #include <memory>
 #include "ChiliMath.h"
 #include <cmath>
+#include "ZBuffer.h"
 
 template<class Effect>
 class Pipeline
@@ -22,10 +23,15 @@ public:
 public:
 	Pipeline( Graphics& gfx )
 		:
-		gfx( gfx )
+		gfx( gfx ),
+		zbuff( Graphics::ScreenWidth,Graphics::ScreenHeight )
 	{
 	}
 
+	void BeginFrame()
+	{
+		zbuff.Clear();
+	}
 	void BindRotation( const Mat3& rot )
 	{
 		rotation = rot;
@@ -215,11 +221,16 @@ private:
 			{
 				// recover interpolated z from interpolated 1/z
 				const float z = 1.0f / itcLine.pos.z;
-				// recover interpolated attributes
-				const auto attr = itcLine * z;
-				// invoke pixel shader with interpolated vertex attributes
-				// and use result to set the pixel color on the screen
-				gfx.PutPixel( x,y,effect.ps( attr.tc ) );
+
+				// check if triangle pixel is the closest one to the camera yet
+				if ( zbuff.TestAndSet( x,y,z ) )
+				{
+					// recover interpolated attributes
+					const auto attr = itcLine * z;
+					// invoke pixel shader with interpolated vertex attributes
+					// and use result to set the pixel color on the screen
+					gfx.PutPixel( x,y,effect.ps( attr.tc ) );
+				}
 			}
 		}
 	}
@@ -228,6 +239,7 @@ public:
 	Effect effect;
 private:
 	Graphics& gfx;
+	ZBuffer zbuff;
 	PubeScreenTransformer pst;
 	Mat3 rotation = Mat3::Identity();
 	Vec3 translation = { 0.0f,0.0f,0.0f };

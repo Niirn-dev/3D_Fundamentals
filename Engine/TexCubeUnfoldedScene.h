@@ -65,6 +65,8 @@ public:
 	}
 	void Draw() override
 	{
+		pipeline.BeginFrame();
+
 		pipeline.BindRotation(
 			Mat3::RotationX( angleX ) *
 			Mat3::RotationY( angleY ) *
