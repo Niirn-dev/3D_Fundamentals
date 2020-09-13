@@ -165,6 +165,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SolidColorCubeScene.h" />
     <ClInclude Include="SolidColorEffect.h" />
+    <ClInclude Include="SolidColorTwoCubeScene.h" />
     <ClInclude Include="Surface.h" />
     <ClInclude Include="TexCubeUnfoldedScene.h" />
     <ClInclude Include="TextureEffectClamp.h" />
