@@ -41,56 +41,75 @@ public:
 
 private:
 	// Vertex Transformer
+	// transforms vertices and then passes vtx & idx lists to triangle assembler
 	void ProcessVertices( const std::vector<Vertex>& verts,const std::vector<size_t>& indices )
 	{
+		// create vertex vector for output
 		std::vector<Vertex> verticesOut;
 		verticesOut.reserve( verts.size() );
+
+		// transform vertices using rotation matris and translation vector
 		for ( const auto& v : verts )
 		{
 			verticesOut.emplace_back( v.pos * rotation + translation,v );
 		}
+
+		// assembe triangles from the stream of indices and vertices
 		AssembleTriangles( verticesOut,indices );
 	}
 
 	// Triangle Assembler
+	// assembles indexed vertex stream into triangles and passes them to post process
+	// culls (does not send) back facing triangles
 	void AssembleTriangles( const std::vector<Vertex>& verts,const std::vector<size_t>& indices )
 	{
+		// assemble triangles in the stream and process
 		for ( size_t i = 0ull; i < indices.size() / 3; ++i )
 		{
 			const Vertex& v0 = verts[indices[i * 3]];
 			const Vertex& v1 = verts[indices[i * 3 + 1]];
 			const Vertex& v2 = verts[indices[i * 3 + 2]];
 
+			// cull backfacing triangles with the help of cross product (%)
 			if ( ( v1.pos - v0.pos ) % ( v2.pos - v0.pos ) * v0.pos < 0.0f )
 			{
+				// process 3 vertices of a frontfacing triangle into a triangle object
 				ProcessTriangle( v0,v1,v2 );
 			}
 		}
 	}
+	// triangle processing function
+	// takes 3 vertices to generate triangle
+	// sends generated triangle to post-processing
 	void ProcessTriangle( const Vertex& v0,const Vertex& v1,const Vertex& v2 )
 	{
+		// generate triangle from 3 vertices (geometry shader will go here later)
+		// and send to post-processing
 		ProcessTriangleVertices( Triangle<Vertex>{ v0,v1,v2 } );
 	}
 
 	// Perspective/Screen Transformer
+	// perform perspective and viewport transformations
 	void ProcessTriangleVertices( Triangle<Vertex>& triangle )
 	{
+		// apply perspective divide and screen transform to all 3 verices
 		pst.Transform( triangle.v0.pos );
 		pst.Transform( triangle.v1.pos );
 		pst.Transform( triangle.v2.pos );
 
+		// draw the triangle
 		DrawTriangle( triangle );
 	}
 
 	// Triangle Rasterizer
 	void DrawTriangle( const Triangle<Vertex>& triangle )
 	{
-		// Get pointers to verts for easier swapping
+		// Get pointers to vertices for easier swapping
 		const auto* pv0 = &triangle.v0;
 		const auto* pv1 = &triangle.v1;
 		const auto* pv2 = &triangle.v2;
 
-		// Sort verts by y
+		// Sort vertices by y
 		if ( pv0->pos.y > pv1->pos.y ) std::swap( pv0,pv1 );
 		if ( pv0->pos.y > pv2->pos.y ) std::swap( pv0,pv2 );
 		if ( pv1->pos.y > pv2->pos.y ) std::swap( pv1,pv2 );
@@ -98,13 +117,13 @@ private:
 		// Establish the type of the passed in triangle
 		if ( pv0->pos.y == pv1->pos.y ) // Flat top triangle
 		{
-			// Sort verts by x
+			// Sort vertices by x
 			if ( pv0->pos.x > pv1->pos.x ) std::swap( pv0,pv1 );
 			DrawTriangleFlatTop( *pv0,*pv1,*pv2 );
 		}
 		else if ( pv1->pos.y == pv2->pos.y ) // Flat bottom triangle
 		{
-			// Sort verts by x
+			// Sort vertices by x
 			if ( pv1->pos.x > pv2->pos.x ) std::swap( pv1,pv2 );
 			DrawTriangleFlatBottom( *pv0,*pv1,*pv2 );
 		}
