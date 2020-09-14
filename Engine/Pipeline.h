@@ -21,6 +21,7 @@ class Pipeline
 public:
 	using Vertex = typename Effect::Vertex;
 	using VSOut = typename Effect::VertexShader::Output;
+	using GSOut = typename Effect::GeometryShader::Output;
 public:
 	Pipeline( Graphics& gfx )
 		:
@@ -83,12 +84,12 @@ private:
 	{
 		// generate triangle from 3 vertices (geometry shader will go here later)
 		// and send to post-processing
-		ProcessTriangleVertices( Triangle<VSOut>{ v0,v1,v2 } );
+		ProcessTriangleVertices( effect.gs( v0,v1,v2 ) );
 	}
 
 	// Perspective/Screen Transformer
 	// perform perspective and viewport transformations
-	void ProcessTriangleVertices( Triangle<VSOut>& triangle )
+	void ProcessTriangleVertices( Triangle<GSOut>& triangle )
 	{
 		// apply perspective divide and screen transform to all 3 verices
 		pst.Transform( triangle.v0 );
@@ -100,7 +101,7 @@ private:
 	}
 
 	// Triangle Rasterizer
-	void DrawTriangle( const Triangle<VSOut>& triangle )
+	void DrawTriangle( const Triangle<GSOut>& triangle )
 	{
 		// Get pointers to vertices for easier swapping
 		const auto* pv0 = &triangle.v0;
@@ -145,9 +146,9 @@ private:
 			}
 		}
 	}
-	void DrawTriangleFlatTop( const VSOut& v0,
-							  const VSOut& v1,
-							  const VSOut& v2 )
+	void DrawTriangleFlatTop( const GSOut& v0,
+							  const GSOut& v1,
+							  const GSOut& v2 )
 	{
 		// Get dVertex / dy
 		const float dy = v2.pos.y - v0.pos.y;
@@ -159,9 +160,9 @@ private:
 
 		DrawTriangleFlat( v0,v1,v2,dv0,dv1,itEdge1 );
 	}
-	void DrawTriangleFlatBottom( const VSOut& v0,
-								 const VSOut& v1,
-								 const VSOut& v2 )
+	void DrawTriangleFlatBottom( const GSOut& v0,
+								 const GSOut& v1,
+								 const GSOut& v2 )
 	{
 		// Get dVertex / dy
 		const float dy = v2.pos.y - v0.pos.y;
@@ -173,12 +174,12 @@ private:
 
 		DrawTriangleFlat( v0,v1,v2,dv0,dv1,itEdge1 );
 	}
-	void DrawTriangleFlat( const VSOut& v0,
-						   const VSOut& v1,
-						   const VSOut& v2,
-						   const VSOut& dv0,
-						   const VSOut& dv1,
-						   VSOut& itEdge1 )
+	void DrawTriangleFlat( const GSOut& v0,
+						   const GSOut& v1,
+						   const GSOut& v2,
+						   const GSOut& dv0,
+						   const GSOut& dv1,
+						   GSOut& itEdge1 )
 	{
 		// Get the interpolated edges
 		auto itEdge0 = v0;

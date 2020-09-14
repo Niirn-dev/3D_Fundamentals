@@ -9,6 +9,7 @@
 #include "Mat3.h"
 #include <cmath>
 #include "ChiliMath.h"
+#include "DefaultGeometryShader.h"
 
 class TextureWaveEffect
 {
@@ -115,6 +116,7 @@ public:
 		Mat3 rotation = Mat3::Identity();
 		Vec3 translation = { 0.0f,0.0f,3.0f };
 	};
+	using GeometryShader = DefaultGeometryShader<Vertex>;
 	class PixelShader
 	{
 	public:
@@ -156,5 +158,6 @@ public:
 
 public:
 	VertexShader vs;
+	GeometryShader gs;
 	PixelShader ps;
 };

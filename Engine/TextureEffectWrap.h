@@ -7,6 +7,7 @@
 #include <string>
 #include "Colors.h"
 #include "DefaultVertexShader.h"
+#include "DefaultGeometryShader.h"
 
 class TextureEffectWrap
 {
@@ -84,6 +85,7 @@ public:
 	};
 
 	using VertexShader = DefaultVertexShader<Vertex>;
+	using GeometryShader = DefaultGeometryShader<Vertex>;
 	class PixelShader
 	{
 	public:
@@ -125,5 +127,6 @@ public:
 
 public:
 	VertexShader vs;
+	GeometryShader gs;
 	PixelShader ps;
 };
