@@ -6,6 +6,7 @@
 #include "Surface.h"
 #include <string>
 #include "Colors.h"
+#include "DefaultVertexShader.h"
 
 class TextureEffectClamp
 {
@@ -75,6 +76,8 @@ public:
 		Vec3 pos;
 		Vec2 tc;
 	};
+
+	using VertexShader = DefaultVertexShader<Vertex>;
 	class PixelShader
 	{
 	public:
@@ -104,5 +107,6 @@ public:
 	};
 
 public:
+	VertexShader vs;
 	PixelShader ps;
 };

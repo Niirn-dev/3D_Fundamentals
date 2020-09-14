@@ -67,11 +67,11 @@ public:
 	{
 		pipeline.BeginFrame();
 
-		pipeline.BindRotation(
+		pipeline.effect.vs.BindRotation(
 			Mat3::RotationX( angleX ) *
 			Mat3::RotationY( angleY ) *
 			Mat3::RotationZ( angleZ ) );
-		pipeline.BindTranslation( translation );
+		pipeline.effect.vs.BindTranslation( translation );
 
 		pipeline.Draw( itlist );
 	}

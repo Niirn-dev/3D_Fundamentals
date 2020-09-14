@@ -20,6 +20,7 @@ class Pipeline
 {
 public:
 	using Vertex = typename Effect::Vertex;
+	using VSOut = typename Effect::VertexShader::Output;
 public:
 	Pipeline( Graphics& gfx )
 		:
@@ -32,14 +33,6 @@ public:
 	{
 		zbuff.Clear();
 	}
-	void BindRotation( const Mat3& rot )
-	{
-		rotation = rot;
-	}
-	void BindTranslation( const Vec3& trans )
-	{
-		translation = trans;
-	}
 	void Draw( const IndexedTriangleList<Vertex>& list )
 	{
 		ProcessVertices( list.vertices,list.indices );
@@ -51,14 +44,13 @@ private:
 	void ProcessVertices( const std::vector<Vertex>& verts,const std::vector<size_t>& indices )
 	{
 		// create vertex vector for output
-		std::vector<Vertex> verticesOut;
+		std::vector<VSOut> verticesOut;
 		verticesOut.reserve( verts.size() );
 
 		// transform vertices using rotation matris and translation vector
-		for ( const auto& v : verts )
-		{
-			verticesOut.emplace_back( v.pos * rotation + translation,v );
-		}
+		std::transform( verts.begin(),verts.end(),
+						std::back_inserter( verticesOut ),
+						effect.vs);
 
 		// assembe triangles from the stream of indices and vertices
 		AssembleTriangles( verticesOut,indices );
@@ -67,14 +59,14 @@ private:
 	// Triangle Assembler
 	// assembles indexed vertex stream into triangles and passes them to post process
 	// culls (does not send) back facing triangles
-	void AssembleTriangles( const std::vector<Vertex>& verts,const std::vector<size_t>& indices )
+	void AssembleTriangles( const std::vector<VSOut>& verts,const std::vector<size_t>& indices )
 	{
 		// assemble triangles in the stream and process
 		for ( size_t i = 0ull; i < indices.size() / 3; ++i )
 		{
-			const Vertex& v0 = verts[indices[i * 3]];
-			const Vertex& v1 = verts[indices[i * 3 + 1]];
-			const Vertex& v2 = verts[indices[i * 3 + 2]];
+			const VSOut& v0 = verts[indices[i * 3]];
+			const VSOut& v1 = verts[indices[i * 3 + 1]];
+			const VSOut& v2 = verts[indices[i * 3 + 2]];
 
 			// cull backfacing triangles with the help of cross product (%)
 			if ( ( v1.pos - v0.pos ) % ( v2.pos - v0.pos ) * v0.pos < 0.0f )
@@ -87,16 +79,16 @@ private:
 	// triangle processing function
 	// takes 3 vertices to generate triangle
 	// sends generated triangle to post-processing
-	void ProcessTriangle( const Vertex& v0,const Vertex& v1,const Vertex& v2 )
+	void ProcessTriangle( const VSOut& v0,const VSOut& v1,const VSOut& v2 )
 	{
 		// generate triangle from 3 vertices (geometry shader will go here later)
 		// and send to post-processing
-		ProcessTriangleVertices( Triangle<Vertex>{ v0,v1,v2 } );
+		ProcessTriangleVertices( Triangle<VSOut>{ v0,v1,v2 } );
 	}
 
 	// Perspective/Screen Transformer
 	// perform perspective and viewport transformations
-	void ProcessTriangleVertices( Triangle<Vertex>& triangle )
+	void ProcessTriangleVertices( Triangle<VSOut>& triangle )
 	{
 		// apply perspective divide and screen transform to all 3 verices
 		pst.Transform( triangle.v0 );
@@ -108,7 +100,7 @@ private:
 	}
 
 	// Triangle Rasterizer
-	void DrawTriangle( const Triangle<Vertex>& triangle )
+	void DrawTriangle( const Triangle<VSOut>& triangle )
 	{
 		// Get pointers to vertices for easier swapping
 		const auto* pv0 = &triangle.v0;
@@ -153,9 +145,9 @@ private:
 			}
 		}
 	}
-	void DrawTriangleFlatTop( const Vertex& v0,
-							  const Vertex& v1,
-							  const Vertex& v2 )
+	void DrawTriangleFlatTop( const VSOut& v0,
+							  const VSOut& v1,
+							  const VSOut& v2 )
 	{
 		// Get dVertex / dy
 		const float dy = v2.pos.y - v0.pos.y;
@@ -167,9 +159,9 @@ private:
 
 		DrawTriangleFlat( v0,v1,v2,dv0,dv1,itEdge1 );
 	}
-	void DrawTriangleFlatBottom( const Vertex& v0,
-								 const Vertex& v1,
-								 const Vertex& v2 )
+	void DrawTriangleFlatBottom( const VSOut& v0,
+								 const VSOut& v1,
+								 const VSOut& v2 )
 	{
 		// Get dVertex / dy
 		const float dy = v2.pos.y - v0.pos.y;
@@ -181,12 +173,12 @@ private:
 
 		DrawTriangleFlat( v0,v1,v2,dv0,dv1,itEdge1 );
 	}
-	void DrawTriangleFlat( const Vertex& v0,
-						   const Vertex& v1,
-						   const Vertex& v2,
-						   const Vertex& dv0,
-						   const Vertex& dv1,
-						   Vertex& itEdge1 )
+	void DrawTriangleFlat( const VSOut& v0,
+						   const VSOut& v1,
+						   const VSOut& v2,
+						   const VSOut& dv0,
+						   const VSOut& dv1,
+						   VSOut& itEdge1 )
 	{
 		// Get the interpolated edges
 		auto itEdge0 = v0;
@@ -241,6 +233,4 @@ private:
 	Graphics& gfx;
 	ZBuffer zbuff;
 	PubeScreenTransformer pst;
-	Mat3 rotation = Mat3::Identity();
-	Vec3 translation = { 0.0f,0.0f,0.0f };
 };

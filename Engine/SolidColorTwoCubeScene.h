@@ -78,19 +78,19 @@ public:
 	{
 		pipeline.BeginFrame();
 
-		pipeline.BindRotation(
+		pipeline.effect.vs.BindRotation(
 			Mat3::RotationX( -angleX ) *
 			Mat3::RotationY( -angleY ) *
 			Mat3::RotationZ( -angleZ ) );
-		pipeline.BindTranslation( Vec3{ 0.0f,0.0f,3.0f } );
+		pipeline.effect.vs.BindTranslation( Vec3{ 0.0f,0.0f,3.0f } );
 		pipeline.Draw( itlist0 );
 
-		pipeline.BindRotation(
+		pipeline.effect.vs.BindRotation(
 			Mat3::RotationX( angleX ) *
 			Mat3::RotationY( angleY ) *
 			Mat3::RotationZ( angleZ )
 		);
-		pipeline.BindTranslation( translation );
+		pipeline.effect.vs.BindTranslation( translation );
 		pipeline.Draw( itlist1 );
 	}
 private:

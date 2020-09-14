@@ -6,6 +6,7 @@
 #include "Surface.h"
 #include <string>
 #include "Colors.h"
+#include "DefaultVertexShader.h"
 
 class SolidColorEffect
 {
@@ -71,6 +72,8 @@ public:
 		Vec3 pos;
 		Vec3 tc; // normalized rgb values
 	};
+
+	using VertexShader = DefaultVertexShader<Vertex>;
 	class PixelShader
 	{
 	public:
@@ -82,5 +85,6 @@ public:
 	};
 
 public:
+	VertexShader vs;
 	PixelShader ps;
 };
