@@ -15,6 +15,12 @@ public:
 	class Vertex
 	{
 	public:
+		Vertex( const Vec3& pos )
+			:
+			pos( pos ),
+			tc{ 0.0f,0.0f }
+		{
+		}
 		Vertex( const Vec3& pos,const Vec2& tc )
 			:
 			pos( pos ),

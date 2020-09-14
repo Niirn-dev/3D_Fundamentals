@@ -24,6 +24,7 @@
 #include "BlendColorCubeScene.h"
 #include "SolidColorCubeScene.h"
 #include "SolidColorTwoCubeScene.h"
+#include "TexPlaneScene.h"
 
 Game::Game( MainWindow& wnd )
 	:
@@ -34,6 +35,7 @@ Game::Game( MainWindow& wnd )
 	scenes.push_back( std::make_unique<BlendColorCubeScene>( gfx,1.0f ) );
 	scenes.push_back( std::make_unique<SolidColorCubeScene>( gfx,1.0f ) );
 	scenes.push_back( std::make_unique<SolidColorTwoCubeScene>( gfx,1.0f ) );
+	scenes.push_back( std::make_unique<TexPlaneScene>( gfx,2.0f,1.0f,L"Textures\\stone_wall_512x512.png" ) );
 	curScene = scenes.begin();
 }
 
