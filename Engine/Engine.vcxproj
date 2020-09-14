@@ -173,6 +173,8 @@
     <ClInclude Include="TexPlaneScene.h" />
     <ClInclude Include="TextureEffectClamp.h" />
     <ClInclude Include="TextureEffectWrap.h" />
+    <ClInclude Include="TextureWaveEffect.h" />
+    <ClInclude Include="TexWavePlaneScene.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="Vec2.h" />
     <ClInclude Include="Vec3.h" />
