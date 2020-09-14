@@ -16,32 +16,32 @@ public:
 	{
 	public:
 		Vertex() = default;
-		Vertex( const Vec3& pos,const Vec3& tc )
+		Vertex( const Vec3& pos,const Vec3& color )
 			:
 			pos( pos ),
-			tc( tc )
+			color( color )
 		{}
 		Vertex( const Vec3& pos,const Vertex& src )
 			:
 			pos( pos ),
-			tc( src.tc )
+			color( src.color )
 		{}
 		Vertex& operator=( const Vertex& rhs )
 		{
 			pos = rhs.pos;
-			tc = rhs.tc;
+			color = rhs.color;
 			return *this;
 		}
 		Vertex& operator+=( const Vertex& rhs )
 		{
 			pos += rhs.pos;
-			tc += rhs.tc;
+			color += rhs.color;
 			return *this;
 		}
 		Vertex& operator-=( const Vertex& rhs )
 		{
 			pos -= rhs.pos;
-			tc -= rhs.tc;
+			color -= rhs.color;
 			return *this;
 		}
 		Vertex	operator+( const Vertex& rhs ) const
@@ -55,7 +55,7 @@ public:
 		Vertex& operator*=( const float& rhs )
 		{
 			pos *= rhs;
-			tc *= rhs;
+			color *= rhs;
 			return *this;
 		}
 		Vertex	operator*( const float& rhs ) const
@@ -65,7 +65,7 @@ public:
 		Vertex& operator/=( const float& rhs )
 		{
 			pos /= rhs;
-			tc /= rhs;
+			color /= rhs;
 			return *this;
 		}
 		Vertex	operator/( const float& rhs ) const
@@ -75,7 +75,7 @@ public:
 
 	public:
 		Vec3 pos;
-		Vec3 tc; // normalized rgb values
+		Vec3 color; // normalized rgb values
 	};
 
 	using VertexShader = DefaultVertexShader<Vertex>;
@@ -86,7 +86,7 @@ public:
 		template<typename Input>
 		Color operator()( const Input& in )
 		{
-			return Color{ in };
+			return Color{ in.color };
 		}
 	};
 

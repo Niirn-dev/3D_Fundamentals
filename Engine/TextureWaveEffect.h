@@ -132,8 +132,8 @@ public:
 		template<typename Input>
 		Color operator()( const Input& in )
 		{
-			float x_modded = fmodf( in.x * tex_width + 0.5f,tex_width );
-			float y_modded = fmodf( in.y * tex_height + 0.5f,tex_height );
+			float x_modded = fmodf( in.tc.x * tex_width + 0.5f,tex_width );
+			float y_modded = fmodf( in.tc.y * tex_height + 0.5f,tex_height );
 			if ( x_modded < 0.0f )
 			{
 				x_modded += tex_width;

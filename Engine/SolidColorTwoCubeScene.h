@@ -9,7 +9,6 @@
 #include "Surface.h"
 #include <memory>
 #include <vector>
-#include <range/v3/all.hpp>
 #include "Pipeline.h"
 #include "SolidColorEffect.h"
 
@@ -22,18 +21,18 @@ public:
 	SolidColorTwoCubeScene( Graphics& gfx,float cubeSize )
 		:
 		pipeline( gfx ),
-		itlist0( Cube::MakeIndividualFaces<Vertex>( cubeSize ) ),
-		itlist1( Cube::MakeIndividualFaces<Vertex>( cubeSize ) )
+		itlist0( Cube::MakePlain<Vertex>( cubeSize ) ),
+		itlist1( Cube::MakePlain<Vertex>( cubeSize ) )
 	{
-		namespace rn = ranges;
-		namespace vi = rn::views;
-
-		for ( size_t i = 0; auto& [v0,v1] : vi::zip( itlist0.vertices,itlist1.vertices ) )
-		{
-			v0.tc = (Vec3)vColors[i / 4 % std::size( vColors )];
-			v1.tc = (Vec3)vColors[i / 4 % std::size( vColors )];
-			++i;
-		}
+		std::vector<Color> colors = {
+			Colors::Red,
+			Colors::Blue,
+			Colors::Green,
+			Colors::Yellow,
+			Colors::Cyan,
+			Colors::Magenta
+		};
+		pipeline.effect.gs.BindColors( std::move( colors ) );
 	}
 
 	void Update( Keyboard& kbd,Mouse& mouse,float dt ) override
@@ -103,13 +102,4 @@ private:
 	float angleY = 0.0f;
 	float angleZ = 0.0f;
 	Vec3 translation = { 0.0f,0.0f,3.0f };
-
-	static constexpr Color vColors[] = {
-		Colors::Red,
-		Colors::Blue,
-		Colors::Green,
-		Colors::Yellow,
-		Colors::Cyan,
-		Colors::Magenta
-	};
 };

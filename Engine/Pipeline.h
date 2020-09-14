@@ -73,18 +73,18 @@ private:
 			if ( ( v1.pos - v0.pos ) % ( v2.pos - v0.pos ) * v0.pos < 0.0f )
 			{
 				// process 3 vertices of a frontfacing triangle into a triangle object
-				ProcessTriangle( v0,v1,v2 );
+				ProcessTriangle( v0,v1,v2,i );
 			}
 		}
 	}
 	// triangle processing function
 	// takes 3 vertices to generate triangle
 	// sends generated triangle to post-processing
-	void ProcessTriangle( const VSOut& v0,const VSOut& v1,const VSOut& v2 )
+	void ProcessTriangle( const VSOut& v0,const VSOut& v1,const VSOut& v2,size_t id )
 	{
-		// generate triangle from 3 vertices (geometry shader will go here later)
+		// generate triangle from 3 vertices using geometry shader
 		// and send to post-processing
-		ProcessTriangleVertices( effect.gs( v0,v1,v2 ) );
+		ProcessTriangleVertices( effect.gs( v0,v1,v2,id ) );
 	}
 
 	// Perspective/Screen Transformer
@@ -222,7 +222,7 @@ private:
 					const auto attr = itcLine * z;
 					// invoke pixel shader with interpolated vertex attributes
 					// and use result to set the pixel color on the screen
-					gfx.PutPixel( x,y,effect.ps( attr.tc ) );
+					gfx.PutPixel( x,y,effect.ps( attr ) );
 				}
 			}
 		}

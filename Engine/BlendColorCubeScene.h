@@ -24,7 +24,7 @@ public:
 	{
 		for ( size_t i = 0; auto& v : itlist.vertices )
 		{
-			v.tc = (Vec3)vColors[i++ % std::size( vColors )];
+			v.color = (Vec3)vColors[i++ % std::size( vColors )];
 		}
 	}
 

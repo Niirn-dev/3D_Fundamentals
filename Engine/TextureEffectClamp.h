@@ -96,8 +96,8 @@ public:
 		Color operator()( const Input& in )
 		{
 			return pTex->GetPixel(
-				(unsigned int)std::min( in.x * tex_width + 0.5f,tex_xclamp ),
-				(unsigned int)std::min( in.y * tex_height + 0.5f,tex_yclamp )
+				(unsigned int)std::min( in.tc.x * tex_width + 0.5f,tex_xclamp ),
+				(unsigned int)std::min( in.tc.y * tex_height + 0.5f,tex_yclamp )
 			);
 		}
 	private:

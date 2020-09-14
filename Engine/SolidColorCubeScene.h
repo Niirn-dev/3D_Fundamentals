@@ -20,12 +20,17 @@ public:
 	SolidColorCubeScene( Graphics& gfx,float cubeSize )
 		:
 		pipeline( gfx ),
-		itlist( Cube::MakeIndividualFaces<Vertex>( cubeSize ) )
+		itlist( Cube::MakePlain<Vertex>( cubeSize ) )
 	{
-		for ( size_t i = 0; auto & v : itlist.vertices )
-		{
-			v.tc = (Vec3)vColors[i++ / 4 % std::size( vColors )];
-		}
+		std::vector<Color> colors = {
+			Colors::Red,
+			Colors::Blue,
+			Colors::Green,
+			Colors::Yellow,
+			Colors::Cyan,
+			Colors::Magenta
+		};
+		pipeline.effect.gs.BindColors( std::move( colors ) );
 	}
 
 	void Update( Keyboard& kbd,Mouse& mouse,float dt ) override
@@ -87,13 +92,4 @@ private:
 	float angleY = 0.0f;
 	float angleZ = 0.0f;
 	Vec3 translation = { 0.0f,0.0f,3.0f };
-
-	static constexpr Color vColors[] = {
-		Colors::Red,
-		Colors::Blue,
-		Colors::Green,
-		Colors::Yellow,
-		Colors::Cyan,
-		Colors::Magenta
-	};
 };
