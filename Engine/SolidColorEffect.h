@@ -137,13 +137,14 @@ public:
 			Vec3 color;
 		};
 		using Output = typename GSVertex;
+		using Input = typename VertexShader::Output;
 
 		void BindColors( std::vector<Color> cs )
 		{
 			colors = std::move( cs );
 		}
 
-		Triangle<Output> operator()( const Vertex& v0,const Vertex& v1,const Vertex& v2,size_t id )
+		Triangle<Output> operator()( const Input& v0,const Input& v1,const Input& v2,size_t id )
 		{
 			Output ov0 = { v0.pos,(Vec3)colors[id / 2 % colors.size()] };
 			Output ov1 = { v1.pos,(Vec3)colors[id / 2 % colors.size()] };
