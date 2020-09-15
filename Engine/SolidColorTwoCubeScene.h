@@ -72,10 +72,60 @@ public:
 		{
 			translation = Vec3{ 0.0f,0.0f,std::max( 2.0f,translation.z - 2.0f * dt ) };
 		}
+
+		if ( kbd.KeyIsPressed( 'T' ) )
+		{
+			lightDir *= Mat3::RotationX( dTheta * dt );
+		}
+		if ( kbd.KeyIsPressed( 'G' ) )
+		{
+			lightDir *= Mat3::RotationX( -dTheta * dt );
+		}
+		if ( kbd.KeyIsPressed( 'Y' ) )
+		{
+			lightDir *= Mat3::RotationY( dTheta * dt );
+		}
+		if ( kbd.KeyIsPressed( 'H' ) )
+		{
+			lightDir *= Mat3::RotationY( -dTheta * dt );
+		}
+		if ( kbd.KeyIsPressed( 'U' ) )
+		{
+			lightDir *= Mat3::RotationZ( dTheta * dt );
+		}
+		if ( kbd.KeyIsPressed( 'J' ) )
+		{
+			lightDir *= Mat3::RotationZ( -dTheta * dt );
+		}
+
+		if ( kbd.KeyIsPressed( 'I' ) )
+		{
+			lightDiffuse += Vec3{ 0.2f,0.2f,0.2f } *dt;
+			lightDiffuse.Saturate();
+		}
+		if ( kbd.KeyIsPressed( 'K' ) )
+		{
+			lightDiffuse -= Vec3{ 0.2f,0.2f,0.2f } *dt;
+			lightDiffuse.Saturate();
+		}
+		if ( kbd.KeyIsPressed( 'O' ) )
+		{
+			lightAmbient += Vec3{ 0.1f,0.1f,0.1f } *dt;
+			lightAmbient.Saturate();
+		}
+		if ( kbd.KeyIsPressed( 'L' ) )
+		{
+			lightAmbient -= Vec3{ 0.1f,0.1f,0.1f } *dt;
+			lightAmbient.Saturate();
+		}
 	}
 	void Draw() override
 	{
 		pipeline.BeginFrame();
+
+		pipeline.effect.gs.BindLightDirection( lightDir );
+		pipeline.effect.gs.BindDiffuseLight( lightDiffuse );
+		pipeline.effect.gs.BindAmbientLight( lightAmbient );
 
 		pipeline.effect.vs.BindRotation(
 			Mat3::RotationX( -angleX ) *
@@ -102,4 +152,8 @@ private:
 	float angleY = 0.0f;
 	float angleZ = 0.0f;
 	Vec3 translation = { 0.0f,0.0f,3.0f };
+
+	Vec3 lightDir = { 0.0f,0.0f,1.0f };
+	Vec3 lightDiffuse = { 1.0f,1.0f,1.0f };
+	Vec3 lightAmbient = { 0.08f,0.08f,0.08f };
 };
