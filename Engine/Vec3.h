@@ -118,6 +118,25 @@ public:
 	{
 		return !( *this == rhs );
 	}
+	_Vec3&	Saturate()
+	{
+		x = std::clamp( x,0.0f,1.0f );
+		y = std::clamp( y,0.0f,1.0f );
+		z = std::clamp( z,0.0f,1.0f );
+		return *this;
+	}
+	_Vec3	GetSaturated() const
+	{
+		return _Vec3( *this ).Saturate();
+	}
+	_Vec3	GetHadamard( const _Vec3& rhs ) const
+	{
+		return _Vec3{
+			x * rhs.x,
+			y * rhs.y,
+			z * rhs.z
+		};
+	}
 public:
 	T z;
 };
