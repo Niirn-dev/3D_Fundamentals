@@ -22,14 +22,21 @@
 
 #include <math.h>
 #include <type_traits>
+#include <concepts>
 
 constexpr double PI_D = 3.1415926535897932;
 constexpr float PI = (float)PI_D;
 
-template <typename T>
+template<typename T>
+concept Squarable = requires( T a )
+	{
+		a * a;
+	};
+
+template<typename T>
+	requires Squarable<T>
 inline auto sq( const T& x )
 {
-	static_assert( std::is_arithmetic_v<T>,"Template parameter is not of an arithmetic type" );
 	return x * x;
 }
 
