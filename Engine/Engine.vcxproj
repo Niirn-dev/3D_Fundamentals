@@ -146,6 +146,7 @@
   <ItemGroup>
     <ClInclude Include="BlendColorCubeScene.h" />
     <ClInclude Include="BlendColorEffect.h" />
+    <ClInclude Include="BunnyScene.h" />
     <ClInclude Include="ChiliException.h" />
     <ClInclude Include="ChiliMath.h" />
     <ClInclude Include="ChiliWin.h" />
@@ -180,6 +181,7 @@
     <ClInclude Include="TextureEffectWrap.h" />
     <ClInclude Include="TextureWaveEffect.h" />
     <ClInclude Include="TexWavePlaneScene.h" />
+    <ClInclude Include="tiny_obj_loader.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="Vec2.h" />
     <ClInclude Include="Vec3.h" />
@@ -195,6 +197,7 @@
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="Surface.cpp" />
+    <ClCompile Include="tiny_obj_loader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="FramebufferPS.hlsl">

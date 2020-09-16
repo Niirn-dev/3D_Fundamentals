@@ -26,18 +26,20 @@
 #include "SolidColorTwoCubeScene.h"
 #include "TexPlaneScene.h"
 #include "TexWavePlaneScene.h"
-
+#include "BunnyScene.h"
 Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
 	gfx( wnd )
 {
+
 	scenes.push_back( std::make_unique<TexCubeUnfoldedScene>( gfx,1.0f,L"Textures\\stone_wall_512x512.png" ) );
 	scenes.push_back( std::make_unique<BlendColorCubeScene>( gfx,1.0f ) );
 	scenes.push_back( std::make_unique<SolidColorCubeScene>( gfx,1.0f ) );
 	scenes.push_back( std::make_unique<SolidColorTwoCubeScene>( gfx,1.0f ) );
 	scenes.push_back( std::make_unique<TexPlaneScene>( gfx,2.0f,1.0f,L"Textures\\stone_wall_512x512.png" ) );
 	scenes.push_back( std::make_unique<TexWavePlaneScene>( gfx,2.0f,1.0f,L"Textures\\stone_wall_512x512.png" ) );
+	scenes.push_back( std::make_unique<BunnyScene>( gfx,"Models\\bunny.obj" ) );
 	curScene = scenes.begin();
 }
 
