@@ -19,7 +19,8 @@ public:
 	BunnyScene( Graphics& gfx,std::string meshFilePath )
 		:
 		pipeline( gfx ),
-		itlist( std::move( IndexedTriangleList<Vertex>::Load( meshFilePath ) ) )
+		itlist( std::move( IndexedTriangleList<Vertex>::Load( meshFilePath ).AdjustToTrueCenter() ) ),
+		translation( 0.0f,0.0f,0.2f + itlist.GetRadius() )
 	{
 		std::vector<Color> colors = {
 			Colors::Red,
