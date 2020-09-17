@@ -27,6 +27,8 @@
 #include "TexPlaneScene.h"
 #include "TexWavePlaneScene.h"
 #include "BunnyScene.h"
+#include "SphereScene.h"
+
 Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
@@ -40,6 +42,7 @@ Game::Game( MainWindow& wnd )
 	scenes.push_back( std::make_unique<TexPlaneScene>( gfx,2.0f,1.0f,L"Textures\\stone_wall_512x512.png" ) );
 	scenes.push_back( std::make_unique<TexWavePlaneScene>( gfx,2.0f,1.0f,L"Textures\\stone_wall_512x512.png" ) );
 	scenes.push_back( std::make_unique<BunnyScene>( gfx,"Models\\bunny.obj" ) );
+	scenes.push_back( std::make_unique<SphereScene>( gfx,1.0f,12,12 ) );
 	curScene = scenes.begin();
 }
 
