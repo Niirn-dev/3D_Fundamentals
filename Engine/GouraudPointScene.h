@@ -5,21 +5,32 @@
 #include "Mat3.h"
 #include "Pipeline.h"
 #include "GouraudPointEffect.h"
+#include "SolidEffect.h"
 
 class GouraudPointScene : public Scene
 {
 public:
-	typedef Pipeline<GouraudPointEffect> Pipeline;
-	typedef Pipeline::Vertex Vertex;
+	typedef Pipeline<GouraudPointEffect> ModelPipeline;
+	typedef Pipeline<SolidEffect> LightPipeline;
+	typedef ModelPipeline::Vertex ModelVertex;
+	typedef LightPipeline::Vertex LightVertex;
 public:
-	GouraudPointScene( Graphics& gfx,IndexedTriangleList<Vertex> tl )
+	GouraudPointScene( Graphics& gfx,IndexedTriangleList<ModelVertex> tl )
 		:
+		pzb( std::make_shared<ZBuffer>( gfx.ScreenWidth,gfx.ScreenHeight ) ),
 		itlist( std::move( tl ) ),
-		pipeline( gfx ),
+		pipeline( gfx,pzb ),
+		light_sphere( std::move( Sphere::GetPlain<LightVertex>( 0.05f ) ) ),
+		lightPipeline( gfx,pzb ),
 		Scene( "gouraud shader scene free mesh" )
 	{
 		itlist.AdjustToTrueCenter();
 		offset_z = itlist.GetRadius() * 1.6f;
+
+		for ( auto& v : light_sphere.vertices )
+		{
+			v.color = light_color;
+		}
 	}
 	virtual void Update( Keyboard& kbd,Mouse& mouse,float dt ) override
 	{
@@ -96,15 +107,26 @@ public:
 		pipeline.effect.vs.SetLightPosition( light_pos );
 		// render triangles
 		pipeline.Draw( itlist );
+
+		lightPipeline.effect.vs.BindRotation( Mat3::Identity() );
+		lightPipeline.effect.vs.BindTranslation( light_pos );
+
+		lightPipeline.Draw( light_sphere );
 	}
 private:
-	IndexedTriangleList<Vertex> itlist;
-	Pipeline pipeline;
+	std::shared_ptr<ZBuffer> pzb;
+
+	IndexedTriangleList<ModelVertex> itlist;
+	ModelPipeline pipeline;
 	static constexpr float dTheta = PI;
 	float offset_z = 2.0f;
 	float theta_x = 0.0f;
 	float theta_y = 0.0f;
 	float theta_z = 0.0f;
+
+	IndexedTriangleList<LightVertex> light_sphere;
+	LightPipeline lightPipeline;
 	Vec3 light_pos = { 0.2f,-0.5f,1.0f };
 	static constexpr float light_speed = 2.0f;
+	static constexpr Color light_color = Colors::Yellow;
 };
