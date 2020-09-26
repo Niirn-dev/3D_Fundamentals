@@ -56,6 +56,18 @@ public:
 		return{ std::move( vertices ),std::move( indices ) };
 	}
 	template<class V>
+	static IndexedTriangleList<V> GetNormals( int divisions = 7,float size = 1.0f )
+	{
+		auto itlist = Plane::GetPlain<V>( divisions,size );
+
+		for ( auto& v : itlist.vertices )
+		{
+			v.n = Vec3{ 0.0f,0.0f,-1.0f };
+		}
+
+		return std::move( itlist );
+	}
+	template<class V>
 	static IndexedTriangleList<V> GetSkinned( int divisions = 7,float size = 1.0f )
 	{
 		auto itlist = GetPlain<V>( divisions,size );

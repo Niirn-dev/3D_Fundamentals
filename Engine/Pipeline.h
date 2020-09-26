@@ -26,8 +26,6 @@ public:
 		gfx( gfx ),
 		pzb( pZbuff )
 	{
-		assert( pZbuff->width == gfx.ScreenWidth );
-		assert( pZbuff->height == gfx.ScreenHeight );
 	}
 	Pipeline( Graphics& gfx )
 		:

@@ -126,7 +126,7 @@ private:
 
 	IndexedTriangleList<LightVertex> light_sphere;
 	LightPipeline lightPipeline;
-	Vec3 light_pos = { 0.2f,-0.5f,1.0f };
+	Vec3 light_pos = { 0.0f,0.0f,0.5f };
 	static constexpr float light_speed = 2.0f;
 	static constexpr Color light_color = Colors::Yellow;
 };
