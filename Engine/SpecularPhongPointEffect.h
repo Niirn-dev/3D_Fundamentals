@@ -146,24 +146,20 @@ public:
 			}
 		public:
 			Vec3 world_pos;
-			Vec3 pos;
-			Vec3 n;
+			Vec4 pos;
+			Vec4 n;
 			Vec3 color;
 		};
 	public:
-		void BindRotation( const Mat3& rotation_in )
+		void BindTransformation( const Mat4& transformation_in )
 		{
-			rotation = rotation_in;
-		}
-		void BindTranslation( const Vec3& translation_in )
-		{
-			translation = translation_in;
+			transformation = transformation_in;
 		}
 		Output operator()( const Vertex& v ) const
 		{
 			// get new vertex position (since light sorce is static and is not rotated/translated)
-			const auto new_v_pos = v.pos * rotation + translation;
-			const auto new_v_n = v.n * rotation;
+			const auto new_v_pos = Vec4( v.pos ) * transformation;
+			const auto new_v_n = Vec4( v.n,0.0f ) * transformation;
 			return{ new_v_pos,new_v_pos,new_v_n,color };
 		}
 		void SetMaterialColor( Color c )
@@ -171,8 +167,7 @@ public:
 			color = Vec3( c );
 		}
 	private:
-		Mat3 rotation = Mat3::Identity();
-		Vec3 translation = { 0.0f,0.0f,0.0f };
+		Mat4 transformation = Mat4::Identity();
 		Vec3 color = { 0.8f,0.85f,1.0f };
 	};
 	// default gs passes vertices through and outputs triangle
