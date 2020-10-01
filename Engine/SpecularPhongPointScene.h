@@ -94,7 +94,7 @@ public:
 	}
 	virtual void Draw() override
 	{
-		const auto proj = Mat4::Projection( Graphics::AspectRatio * 2.0f,2.0f,1.0f,10.0f );
+		const auto proj = Mat4::ProjectionHFOV( 100.0f,Graphics::AspectRatio,1.0f,10.0f );
 		pipeline.BeginFrame();
 		// set pipeline transform
 		pipeline.effect.vs.BindWorld( 

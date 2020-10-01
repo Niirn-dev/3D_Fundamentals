@@ -217,6 +217,22 @@ public:
 			(T)0.0,        (T)0.0,        -f * n * zDenInv,(T)0.0
 		};
 	}
+	constexpr static _Mat ProjectionHFOV( T fov_deg,T ar,T n,T f )
+	{
+		static_assert( S == 4,"Bad matrix dimentions. Projection only supported for 4 dimentional matrices" );
+
+		const T fov_rad = fov_deg * (T)PI / (T)180.0;
+		const T w = (T)1.0 / std::tan( fov_rad / (T)2.0 );
+		const T h = w * ar;
+		const auto zDenInv = (T)1.0 / ( f - n );
+
+		return {
+			w,     (T)0.0,(T)0.0,          (T)0.0,
+			(T)0.0,h,     (T)0.0,          (T)0.0,
+			(T)0.0,(T)0.0,f * zDenInv,     (T)1.0,
+			(T)0.0,(T)0.0,-f * n * zDenInv,(T)0.0
+		};
+	}
 public:
 	// [ row ][ col ]
 	T elements[S][S];
