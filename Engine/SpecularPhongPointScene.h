@@ -94,6 +94,7 @@ public:
 	}
 	virtual void Draw() override
 	{
+		const auto proj = Mat4::Projection( Graphics::AspectRatio * 2.0f,2.0f,1.0f,10.0f );
 		pipeline.BeginFrame();
 		// set pipeline transform
 		pipeline.effect.vs.BindWorld( 
@@ -102,9 +103,7 @@ public:
 			Mat4::RotationZ( theta_z ) *
 			Mat4::Translation( 0.0f,0.0f,offset_z )
 		);
-		pipeline.effect.vs.BindProjection(
-			Mat4::Projection( 2.0f,2.0f,1.0f,10.0f )
-		);
+		pipeline.effect.vs.BindProjection( proj );
 		pipeline.effect.ps.SetLightPosition( light_pos );
 		// render triangles
 		pipeline.Draw( itlist );
@@ -117,9 +116,7 @@ public:
 				light_pos.z
 			)
 		);
-		lightPipeline.effect.vs.BindProjection(
-			Mat4::Projection( 2.0f,2.0f,1.0f,10.0f )
-		);
+		lightPipeline.effect.vs.BindProjection( proj );
 
 		lightPipeline.Draw( light_sphere );
 	}
