@@ -1,11 +1,11 @@
 #pragma once
-#include "Vec3.h"
+#include "Vec4.h"
 #include "Graphics.h"
 
-class PubeScreenTransformer
+class NDCScreenTransformer
 {
 public:
-	PubeScreenTransformer()
+	NDCScreenTransformer()
 		:
 		xFactor( float( Graphics::ScreenWidth ) / 2.0f ),
 		yFactor( float( Graphics::ScreenHeight ) / 2.0f )
@@ -13,19 +13,19 @@ public:
 	template<class Vertex>
 	Vertex& Transform( Vertex& v ) const
 	{
-		const float zInv = 1.0f / v.pos.z;
-		// divide all position components and attributes by z
-		// (we want to be interpolating our attributes in the
-		//  same space where the x,y interpolation is taking
-		//  place to prevent distortion)
-		v *= zInv;
+		// perofrm homo -> ndc on xyz / perspective-correct interpolative divide on all other attributes
+		const float wInv = 1.0f / v.pos.w;
+		// additional divide for mapped z because it must be interpolated
+		// adjust position x,y from perspective normalized space
+		// to screen dimension space after perspective divide
+		v *= wInv;
 		// adjust position x,y from perspective normalized space
 		// to screen dimension space after perspective divide
 		v.pos.x = (v.pos.x + 1.0f) * xFactor;
 		v.pos.y = (-v.pos.y + 1.0f) * yFactor;
-		// store 1/z in z (we will need the interpolated 1/z
+		// store 1/w in w (we will need the interpolated 1/w
 		// so that we can recover the attributes after interp.)
-		v.pos.z = zInv;
+		v.pos.w = wInv;
 
 		return v;
 	}

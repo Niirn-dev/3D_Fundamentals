@@ -78,18 +78,18 @@ public:
 		{
 		public:
 			Output() = default;
-			Output( const Vec3& pos )
+			Output( const Vec4& pos )
 				:
 				pos( pos )
 			{}
-			Output( const Vec3& pos,const Output& src )
+			Output( const Vec4& pos,const Output& src )
 				:
 				world_pos( src.world_pos ),
 				n( src.n ),
 				color( src.color ),
 				pos( pos )
 			{}
-			Output( const Vec3& world_pos,const Vec3& pos,const Vec3& n,const Vec3& color )
+			Output( const Vec3& world_pos,const Vec4& pos,const Vec3& n,const Vec3& color )
 				:
 				world_pos( world_pos ),
 				color( color ),
@@ -147,27 +147,38 @@ public:
 		public:
 			Vec3 world_pos;
 			Vec4 pos;
-			Vec4 n;
+			Vec3 n;
 			Vec3 color;
 		};
 	public:
-		void BindTransformation( const Mat4& transformation_in )
+		void BindWorld( const Mat4& transformation_in )
 		{
-			transformation = transformation_in;
+			world = transformation_in;
+			worldProj = world * proj;
+		}
+		void BindProjection( const Mat4& transformation_in )
+		{
+			proj = transformation_in;
+			worldProj = world * proj;
+		}
+		const Mat4& GetProjection() const
+		{
+			return proj;
 		}
 		Output operator()( const Vertex& v ) const
 		{
 			// get new vertex position (since light sorce is static and is not rotated/translated)
-			const auto new_v_pos = Vec4( v.pos ) * transformation;
-			const auto new_v_n = Vec4( v.n,0.0f ) * transformation;
-			return{ new_v_pos,new_v_pos,new_v_n,color };
+			const auto p4 = Vec4( v.pos );
+			return{ p4 * world,p4 * worldProj,Vec4( v.n,0.0f ) * world,color };
 		}
 		void SetMaterialColor( Color c )
 		{
 			color = Vec3( c );
 		}
 	private:
-		Mat4 transformation = Mat4::Identity();
+		Mat4 world = Mat4::Identity();
+		Mat4 proj = Mat4::Identity();
+		Mat4 worldProj = Mat4::Identity();
 		Vec3 color = { 0.8f,0.85f,1.0f };
 	};
 	// default gs passes vertices through and outputs triangle

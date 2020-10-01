@@ -69,7 +69,7 @@ public:
 		}
 		return result;
 	}
-	static _Mat Identity()
+	constexpr static _Mat Identity()
 	{
 		if constexpr ( S == 3 )
 		{
@@ -93,7 +93,7 @@ public:
 			static_assert( false,"Bad matrix dimentions" );
 		}
 	}
-	static _Mat Scaling( T factor )
+	constexpr static _Mat Scaling( T factor )
 	{
 		if constexpr ( S == 3 )
 		{
@@ -117,7 +117,7 @@ public:
 			static_assert( false,"Bad matrix dimentions" );
 		}
 	}
-	static _Mat RotationZ( T theta )
+	constexpr static _Mat RotationZ( T theta )
 	{
 		const T sinTheta = sin( theta );
 		const T cosTheta = cos( theta );
@@ -143,7 +143,7 @@ public:
 			static_assert( false,"Bad matrix dimentions" );
 		}
 	}
-	static _Mat RotationY( T theta )
+	constexpr static _Mat RotationY( T theta )
 	{
 		const T sinTheta = sin( theta );
 		const T cosTheta = cos( theta );
@@ -169,7 +169,7 @@ public:
 			static_assert( false,"Bad matrix dimentions" );
 		}
 	}
-	static _Mat RotationX( T theta )
+	constexpr static _Mat RotationX( T theta )
 	{
 		const T sinTheta = sin( theta );
 		const T cosTheta = cos( theta );
@@ -195,7 +195,7 @@ public:
 			static_assert( false,"Bad matrix dimentions" );
 		}
 	}
-	static _Mat Translation( T dx,T dy,T dz )
+	constexpr static _Mat Translation( T dx,T dy,T dz )
 	{
 		static_assert( S == 4,"Bad matrix dimentions. Translation only supported for 4 dimentional matrices" );
 		return{
@@ -203,6 +203,18 @@ public:
 			(T)0.0,(T)1.0,(T)0.0,(T)0.0,
 			(T)0.0,(T)0.0,(T)1.0,(T)0.0,
 			  dx  ,  dy  ,  dz  ,(T)1.0
+		};
+	}
+	constexpr static _Mat Projection( T w,T h,T n,T f )
+	{
+		static_assert( S == 4,"Bad matrix dimentions. Projection only supported for 4 dimentional matrices" );
+
+		const auto zDenInv = (T)1.0 / ( f - n );
+		return {
+			(T)2.0 * n / w,(T)0.0,        (T)0.0,          (T)0.0,
+			(T)0.0,        (T)2.0 * n / h,(T)0.0,          (T)0.0,
+			(T)0.0,        (T)0.0,        f * zDenInv,     (T)1.0,
+			(T)0.0,        (T)0.0,        -f * n * zDenInv,(T)0.0
 		};
 	}
 public:
