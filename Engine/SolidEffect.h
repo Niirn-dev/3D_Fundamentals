@@ -139,6 +139,10 @@ public:
 		{
 			proj = transformation_in;
 		}
+		const Mat4& GetProjection() const
+		{
+			return proj;
+		}
 		Output operator()( const Vertex& in )
 		{
 			const auto worldProj = world * proj;
