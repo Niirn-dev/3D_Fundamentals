@@ -87,7 +87,115 @@ private:
 	{
 		// generate triangle from 3 vertices using gs
 		// and send to post-processing
-		PostProcessTriangleVertices( effect.gs( v0,v1,v2,triangle_index ) );
+		ClipCullTriangle( effect.gs( v0,v1,v2,triangle_index ) );
+	}
+	// do the triangle culling
+	void ClipCullTriangle( Triangle<GSOut>& triangle )
+	{
+		// cull triangle if all it's vertices gonna end up outside of the NDC space
+		if ( triangle.v0.pos.x > triangle.v0.pos.w &&
+			 triangle.v1.pos.x > triangle.v1.pos.w &&
+			 triangle.v2.pos.x > triangle.v2.pos.w )
+		{
+			return;
+		}
+		if ( triangle.v0.pos.x < -triangle.v0.pos.w &&
+			 triangle.v1.pos.x < -triangle.v1.pos.w &&
+			 triangle.v2.pos.x < -triangle.v2.pos.w )
+		{
+			return;
+		}
+		if ( triangle.v0.pos.y > triangle.v0.pos.w &&
+			 triangle.v1.pos.y > triangle.v1.pos.w &&
+			 triangle.v2.pos.y > triangle.v2.pos.w )
+		{
+			return;
+		}
+		if ( triangle.v0.pos.y < -triangle.v0.pos.w &&
+			 triangle.v1.pos.y < -triangle.v1.pos.w &&
+			 triangle.v2.pos.y < -triangle.v2.pos.w )
+		{
+			return;
+		}
+		if ( triangle.v0.pos.z > triangle.v0.pos.w &&
+			 triangle.v1.pos.z > triangle.v1.pos.w &&
+			 triangle.v2.pos.z > triangle.v2.pos.w )
+		{
+			return;
+		}
+		if ( triangle.v0.pos.z < 0.0f &&
+			 triangle.v1.pos.z < 0.0f &&
+			 triangle.v2.pos.z < 0.0f )
+		{
+			return;
+		}
+
+		// at least one of the vertices is gonna end up inside NDC space, proceed with clipping
+
+		// make some helper lambdas for near plane clipping
+		// clip if only v0 is outside
+		const auto ClipOne = [this]( GSOut& v0,GSOut& v1,GSOut& v2 ) -> void
+		{
+			const auto alphaA = ( -v0.pos.z ) / ( v1.pos.z - v0.pos.z );
+			const auto alphaB = ( -v0.pos.z ) / ( v2.pos.z - v0.pos.z );
+
+			const auto viA = interpolate( v0,v1,alphaA );
+			const auto viB = interpolate( v0,v2,alphaB );
+
+			PostProcessTriangleVertices( Triangle<GSOut>{ viA,v1,v2 } );
+			PostProcessTriangleVertices( Triangle<GSOut>{ viB,viA,v2 } );
+		};
+		// clip if v0 and v1 are outside
+		const auto ClipTwo = [this]( GSOut& v0,GSOut& v1,GSOut& v2 ) -> void
+		{
+			const auto alpha0 = ( -v0.pos.z ) / ( v2.pos.z - v0.pos.z );
+			const auto alpha1 = ( -v1.pos.z ) / ( v2.pos.z - v1.pos.z );
+
+			v0 = interpolate( v0,v2,alpha0 );
+			v1 = interpolate( v1,v2,alpha1 );
+
+			PostProcessTriangleVertices( Triangle<GSOut>{ v0,v1,v2 } );
+		};
+
+		auto& v0 = triangle.v0;
+		auto& v1 = triangle.v1;
+		auto& v2 = triangle.v2;
+
+		// clip vertices to the near plane
+		if ( v0.pos.z < 0.0f )
+		{
+			if ( v1.pos.z < 0.0f )
+			{
+				ClipTwo( v0,v1,v2 );
+			}
+			else if ( v2.pos.z < 0.0f )
+			{
+				ClipTwo( v2,v0,v1 );
+			}
+			else
+			{
+				ClipOne( v0,v1,v2 );
+			}
+		}
+		else if ( v1.pos.z < 0.0f )
+		{
+			if ( v2.pos.z < 0.0f )
+			{
+				ClipTwo( v1,v2,v0 );
+			}
+			else
+			{
+				ClipOne( v1,v2,v0 );
+			}
+		}
+		else if ( v2.pos.z < 0.0f )
+		{
+			ClipOne( v2,v0,v1 );
+		}
+		else // no clipping needed
+		{
+			PostProcessTriangleVertices( triangle );
+		}
 	}
 	// vertex post-processing function
 	// perform perspective and viewport transformations
@@ -201,8 +309,8 @@ private:
 		auto itEdge0 = it0;
 
 		// calculate start and end scanlines
-		const int yStart = (int)ceil( it0.pos.y - 0.5f );
-		const int yEnd = (int)ceil( it2.pos.y - 0.5f ); // the scanline AFTER the last line drawn
+		const int yStart = std::max( (int)ceil( it0.pos.y - 0.5f ),0 );
+		const int yEnd = std::min( (int)ceil( it2.pos.y - 0.5f ),(int)Graphics::ScreenHeight ); // the scanline AFTER the last line drawn
 
 		// do interpolant prestep
 		itEdge0 += dv0 * (float( yStart ) + 0.5f - it0.pos.y);
@@ -211,8 +319,8 @@ private:
 		for( int y = yStart; y < yEnd; y++,itEdge0 += dv0,itEdge1 += dv1 )
 		{
 			// calculate start and end pixels
-			const int xStart = (int)ceil( itEdge0.pos.x - 0.5f );
-			const int xEnd = (int)ceil( itEdge1.pos.x - 0.5f ); // the pixel AFTER the last pixel drawn
+			const int xStart = std::max( (int)ceil( itEdge0.pos.x - 0.5f ),0 );
+			const int xEnd = std::min( (int)ceil( itEdge1.pos.x - 0.5f ),(int)Graphics::ScreenWidth ); // the pixel AFTER the last pixel drawn
 
 			// create scanline interpolant startpoint
 			// (some waste for interpolating x,y,z, but makes life easier not having
