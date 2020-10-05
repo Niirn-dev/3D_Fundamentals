@@ -154,12 +154,19 @@ public:
 		void BindWorld( const Mat4& transformation_in )
 		{
 			world = transformation_in;
-			worldProj = world * proj;
+			worldCamera = world * camera;
+			worldCameraProj = worldCamera * proj;
+		}
+		void BindCamera( const Mat4& transformation_in )
+		{
+			camera = transformation_in;
+			worldCamera = world * camera;
+			worldCameraProj = worldCamera * proj;
 		}
 		void BindProjection( const Mat4& transformation_in )
 		{
 			proj = transformation_in;
-			worldProj = world * proj;
+			worldCameraProj = worldCamera * proj;
 		}
 		const Mat4& GetProjection() const
 		{
@@ -169,7 +176,7 @@ public:
 		{
 			// get new vertex position (since light sorce is static and is not rotated/translated)
 			const auto p4 = Vec4( v.pos );
-			return{ p4 * world,p4 * worldProj,Vec4( v.n,0.0f ) * world,color };
+			return{ p4 * worldCamera,p4 * worldCameraProj,Vec4( v.n,0.0f ) * worldCamera,color };
 		}
 		void SetMaterialColor( Color c )
 		{
@@ -177,8 +184,10 @@ public:
 		}
 	private:
 		Mat4 world = Mat4::Identity();
+		Mat4 camera = Mat4::Identity();
 		Mat4 proj = Mat4::Identity();
-		Mat4 worldProj = Mat4::Identity();
+		Mat4 worldCamera = Mat4::Identity();
+		Mat4 worldCameraProj = Mat4::Identity();
 		Vec3 color = { 0.8f,0.85f,1.0f };
 	};
 	// default gs passes vertices through and outputs triangle

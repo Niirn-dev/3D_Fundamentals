@@ -134,10 +134,19 @@ public:
 		void BindWorld( const Mat4& transformation_in )
 		{
 			world = transformation_in;
+			worldCamera = world * camera;
+			worldCameraProj = worldCamera * proj;
+		}
+		void BindCamera( const Mat4& transformation_in )
+		{
+			camera = transformation_in;
+			worldCamera = world * camera;
+			worldCameraProj = worldCamera * proj;
 		}
 		void BindProjection( const Mat4& transformation_in )
 		{
 			proj = transformation_in;
+			worldCameraProj = worldCamera * proj;
 		}
 		const Mat4& GetProjection() const
 		{
@@ -145,13 +154,15 @@ public:
 		}
 		Output operator()( const Vertex& in )
 		{
-			const auto worldProj = world * proj;
-			return { Vec4( in.pos ) * worldProj,in.color };
+			return { Vec4( in.pos ) * worldCameraProj,in.color };
 		}
 
 	private:
 		Mat4 world = Mat4::Identity();
+		Mat4 camera = Mat4::Identity();
 		Mat4 proj  = Mat4::Identity();
+		Mat4 worldCamera = Mat4::Identity();
+		Mat4 worldCameraProj = Mat4::Identity();
 	};
 	// default gs passes vertices through and outputs triangle
 	typedef DefaultGeometryShader<VertexShader::Output> GeometryShader;

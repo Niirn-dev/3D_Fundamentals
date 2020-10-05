@@ -205,6 +205,10 @@ public:
 			  dx  ,  dy  ,  dz  ,(T)1.0
 		};
 	}
+	constexpr static _Mat Translation( _Vec3<T> offset )
+	{
+		return std::move( Translation( offset.x,offset.y,offset.z ) );
+	}
 	constexpr static _Mat Projection( T w,T h,T n,T f )
 	{
 		static_assert( S == 4,"Bad matrix dimentions. Projection only supported for 4 dimentional matrices" );
