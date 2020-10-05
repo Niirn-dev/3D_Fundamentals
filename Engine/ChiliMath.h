@@ -45,3 +45,9 @@ inline T interpolate( const T& src,const T& dst,float alpha )
 {
 	return src + (dst - src) * alpha;
 }
+
+template<typename T>
+inline constexpr T to_radians( const T& angle_deg )
+{
+	return angle_deg * (T)PI / (T)180.0;
+}

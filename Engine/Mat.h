@@ -69,6 +69,21 @@ public:
 		}
 		return result;
 	}
+	_Mat&	Transpose()
+	{
+		for ( size_t row = 0; row < S; ++row )
+		{
+			for ( size_t col = row + 1; col < S; ++col )
+			{
+				std::swap( elements[row][col],elements[col][row] );
+			}
+		}
+		return *this;
+	}
+	_Mat	GetTransposed() const
+	{
+		return _Mat( *this ).Transpose();
+	}
 	constexpr static _Mat Identity()
 	{
 		if constexpr ( S == 3 )

@@ -7,6 +7,9 @@
 #include "SpecularPhongPointEffect.h"
 #include "SolidEffect.h"
 #include "Sphere.h"
+#include "MouseTracker.h"
+#include "Mouse.h"
+#include "ChiliMath.h"
 
 class SpecularPhongPointScene : public Scene
 {
@@ -16,9 +19,11 @@ public:
 	typedef ModelPipeline::Vertex ModelVertex;
 	typedef LightPipeline::Vertex LightVertex;
 public:
-	SpecularPhongPointScene( Graphics& gfx,IndexedTriangleList<ModelVertex> tl )
+	SpecularPhongPointScene( Mouse& mouse,Graphics& gfx,IndexedTriangleList<ModelVertex> tl )
 		:
 		pzb( std::make_shared<ZBuffer>( gfx.ScreenWidth,gfx.ScreenHeight ) ),
+		mouse( mouse ),
+		mt( std::make_unique<MouseTracker>() ),
 		itlist( std::move( tl ) ),
 		pipeline( gfx,pzb ),
 		lightSphere( std::move( Sphere::GetPlain<LightVertex>( 0.05f ) ) ),
@@ -37,25 +42,50 @@ public:
 	{
 		if ( kbd.KeyIsPressed( 'W' ) )
 		{
-			cameraPos.z += cameraSpeed * dt;
+			cameraPos += Vec4{ 0.0f,0.0f,1.0f,0.0f } * cameraRotationInv.GetTransposed() * cameraSpeed * dt;
 		}
 		if ( kbd.KeyIsPressed( 'A' ) )
 		{
-			cameraPos.x -= cameraSpeed * dt;
+			cameraPos -= Vec4{ 1.0f,0.0f,0.0f,0.0f } *cameraRotationInv.GetTransposed() * cameraSpeed * dt;
 		}
 		if ( kbd.KeyIsPressed( 'S' ) )
 		{
-			cameraPos.z -= cameraSpeed * dt;
+			cameraPos -= Vec4{ 0.0f,0.0f,1.0f,0.0f } *cameraRotationInv.GetTransposed() * cameraSpeed * dt;
 		}
 		if ( kbd.KeyIsPressed( 'D' ) )
 		{
-			cameraPos.x += cameraSpeed * dt;
+			cameraPos += Vec4{ 1.0f,0.0f,0.0f,0.0f } *cameraRotationInv.GetTransposed() * cameraSpeed * dt;
+		}
+
+		while ( !mouse.IsEmpty() )
+		{
+			const auto e = mouse.Read();
+			switch ( e.GetType() )
+			{
+			case Mouse::Event::LPress:
+				mt->Engage( e.GetPos() );
+				break;
+			case Mouse::Event::LRelease:
+				mt->Disengage();
+				break;
+			case Mouse::Event::Move:
+				if ( mt->IsEngaged() )
+				{
+					const auto delta = mt->Move( e.GetPos() );
+					cameraRotationInv = cameraRotationInv *
+						Mat4::RotationY( (float)delta.x * htrack ) *
+						Mat4::RotationX( (float)delta.y * vtrack );
+				}
+				break;
+			default:
+				break;
+			}
 		}
 	}
 	virtual void Draw() override
 	{
-		const auto proj = Mat4::ProjectionHFOV( 100.0f,Graphics::AspectRatio,0.5f,4.0f );
-		const auto camera = Mat4::Translation( -cameraPos );
+		const auto proj = Mat4::ProjectionHFOV( hfov,Graphics::AspectRatio,0.5f,4.0f );
+		const auto camera = Mat4::Translation( -cameraPos ) * cameraRotationInv;
 		pipeline.BeginFrame();
 		// set pipeline transform
 		pipeline.effect.vs.BindWorld(
@@ -80,13 +110,22 @@ public:
 	}
 private:
 	std::shared_ptr<ZBuffer> pzb;
+	Mouse& mouse;
+	std::unique_ptr<MouseTracker> mt;
 
 	IndexedTriangleList<ModelVertex> itlist;
 	ModelPipeline pipeline;
 	Vec3 modelPos = { 0.0f,0.0f,2.0f };
 
+	static constexpr float hfov = 95.0f;
+	static constexpr float vfov = hfov / Graphics::AspectRatio;
+
+	static constexpr float htrack = to_radians( hfov ) / (float)Graphics::ScreenWidth;
+	static constexpr float vtrack = to_radians( vfov ) / (float)Graphics::ScreenHeight;
+
 	Vec3 cameraPos = { 0.0f,0.0f,0.0f };
-	static constexpr float cameraSpeed = 2.0f;
+	Mat4 cameraRotationInv = Mat4::Identity();
+	static constexpr float cameraSpeed = 1.0f;
 
 	IndexedTriangleList<LightVertex> lightSphere;
 	LightPipeline lightPipeline;
