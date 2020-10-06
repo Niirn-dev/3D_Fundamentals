@@ -72,9 +72,13 @@ public:
 				if ( mt->IsEngaged() )
 				{
 					const auto delta = mt->Move( e.GetPos() );
-					cameraRotationInv = cameraRotationInv *
-						Mat4::RotationY( (float)delta.x * htrack ) *
-						Mat4::RotationX( (float)delta.y * vtrack );
+					const auto dPitch = (float)delta.y * vtrack;
+					const auto dYaw = (float)delta.x * htrack;
+					pitch = std::clamp( pitch + dPitch,-PI / 2.0f,PI / 2.0f );
+					yaw = std::clamp( yaw + dYaw,-PI,PI );
+					cameraRotationInv = 
+						Mat4::RotationY( yaw ) *
+						Mat4::RotationX( pitch );
 				}
 				break;
 			default:
@@ -122,6 +126,9 @@ private:
 
 	static constexpr float htrack = to_radians( hfov ) / (float)Graphics::ScreenWidth;
 	static constexpr float vtrack = to_radians( vfov ) / (float)Graphics::ScreenHeight;
+
+	float pitch = 0.0f; // vertical (radians)
+	float yaw = 0.0f; // horisontal (radians)
 
 	Vec3 cameraPos = { 0.0f,0.0f,0.0f };
 	Mat4 cameraRotationInv = Mat4::Identity();
